@@ -10,3 +10,22 @@ export interface AccountTokenResponse {
 	info: string;
 	token?: string;
 }
+
+export interface AccountData {
+	Email: string;
+	StorageUsed: bigint;
+	StorageLimit: bigint;
+	DownloadUsed: bigint;
+	DownloadLimit: bigint;
+	UploadUsed: bigint;
+	UploadLimit: bigint;
+	AccountType: number;
+	StorageType: string;
+	Created: bigint;
+}
+
+export interface AccountDataResponse {
+	error: Error;
+	info: string;
+	data?: AccountData;
+}

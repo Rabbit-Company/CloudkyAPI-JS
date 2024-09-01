@@ -1,8 +1,8 @@
 import { expect, test, describe } from "bun:test";
-import CloudkyAPI from "../../src/cloudky-api";
+import CloudkyAPI from "../../../../src/cloudky-api";
 import Blake2b from "@rabbit-company/blake2b";
-import type { AccountTokenResponse } from "../../src/types";
-import { Error } from "../../src/errors";
+import type { AccountTokenResponse } from "../../../../src/types";
+import { Error } from "../../../../src/errors";
 
 const server = "http://localhost:8085";
 const username = "test";
