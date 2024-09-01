@@ -1,0 +1,46 @@
+{
+	"name": "@rabbit-company/cloudky-api",
+	"version": "1.0.0",
+	"description": "API for Cloudky Server",
+	"main": "./module/cloudky-api.js",
+	"browser": "./module/cloudky-api.js",
+	"type": "module",
+	"homepage": "https://github.com/Rabbit-Company/CloudkyAPI-JS",
+	"funding": "https://rabbit-company.com/donation",
+	"author": "Rabbit Company <info@rabbit-company.com>",
+	"license": "MIT",
+	"private": false,
+	"scripts": {
+		"build": "bun run build.ts"
+	},
+	"files": [
+		"module/cloudky-api.js",
+		"module/cloudky-api.d.ts"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Rabbit-Company/CloudkyAPI-JS.git"
+	},
+	"contributors": [
+		"Rabbit Company <info@rabbit-company.com> (https://github.com/Rabbit-Company)"
+	],
+	"bugs": {
+		"url": "https://github.com/Rabbit-Company/CloudkyAPI-JS/issues",
+		"email": "info@rabbit-company.com"
+	},
+	"keywords": [
+		"cloudky",
+		"api"
+	],
+	"devDependencies": {
+		"@types/bun": "^1.1.8",
+		"bun-plugin-dts": "^0.2.3",
+		"@rabbit-company/logger": "npm:@jsr/rabbit-company__logger@4.0.1"
+	},
+	"peerDependencies": {
+		"typescript": "^5.5.4"
+	},
+	"dependencies": {
+		"@rabbit-company/blake2b": "npm:@jsr/rabbit-company__blake2b@2.1.1"
+	}
+}
