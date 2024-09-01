@@ -11,7 +11,8 @@
 	"license": "MIT",
 	"private": false,
 	"scripts": {
-		"build": "bun run build.ts"
+		"build": "bun run build.ts",
+		"test": "bun test"
 	},
 	"files": [
 		"module/cloudky-api.js",

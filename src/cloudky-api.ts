@@ -88,6 +88,30 @@ namespace CloudkyAPI {
 		}
 	}
 
+	export async function deleteAccount(server: string, username: string, token: string): Promise<StandardResponse> {
+		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
+		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
+		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
+
+		try {
+			const result = await fetch(server + "/v1/account/delete", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Basic ${btoa(username + ":" + token)}`,
+				},
+			});
+
+			const response: StandardResponse = await result.json();
+			if (Validate.response(response)) return response;
+
+			return Errors.getJson(Error.UNKNOWN_ERROR);
+		} catch (err) {
+			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
+			return Errors.getJson(Error.SERVER_UNREACHABLE);
+		}
+	}
+
 	export async function getFileList(server: string, username: string, token: string): Promise<any> {
 		if (!Validate.url(server)) throw "url_invalid";
 		if (!Validate.username(username)) throw "12";
@@ -126,7 +150,7 @@ namespace CloudkyAPI {
 			};
 
 			const result = await fetch(server + "/v1/file/delete", {
-				method: "POST",
+				method: "DELETE",
 				headers: headers,
 				body: JSON.stringify(data),
 			});
