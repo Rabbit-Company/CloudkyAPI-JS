@@ -166,32 +166,36 @@ namespace CloudkyAPI {
 		}
 	}
 
-	export async function downloadFile(server: string, username: string, token: string, path: string): Promise<Blob> {
-		if (!Validate.url(server)) throw "url_invalid";
-		if (!Validate.username(username)) throw "12";
-		if (!Validate.token(token)) throw "25";
+	export async function downloadFile(server: string, username: string, token: string, path: string): Promise<Blob | StandardResponse> {
+		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
+		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
+		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
+		if (!Validate.userFilePathName(path)) return Errors.getJson(Error.INVALID_FILE_NAME);
 
 		try {
-			let headers = new Headers();
-			headers.append("Authorization", "Basic " + btoa(username + ":" + token));
-
 			const data = {
 				path: path,
 			};
 
 			const result = await fetch(server + "/v1/file/download", {
 				method: "POST",
-				headers: headers,
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Basic ${btoa(username + ":" + token)}`,
+				},
 				body: JSON.stringify(data),
 			});
 
-			if (result.status !== 200 && result.status !== 429) {
-				throw "server_unreachable";
+			if (result.status !== 200) {
+				const response: StandardResponse = await result.json();
+				if (Validate.response(response)) return response;
+				return Errors.getJson(Error.UNKNOWN_ERROR);
 			}
 
 			return await result.blob();
-		} catch {
-			throw "server_unreachable";
+		} catch (err) {
+			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
+			return Errors.getJson(Error.SERVER_UNREACHABLE);
 		}
 	}
 }

@@ -60,6 +60,11 @@ namespace Validate {
 		return typeof response.error === "number" && typeof response.info === "string";
 	}
 
+	export function userFilePathName(filePathName: string): boolean {
+		if (filePathName.includes("..")) return false;
+		return /^[a-zA-Z0-9\/_. -]+$/.test(filePathName);
+	}
+
 	export function userFilePathNames(filePathNames: string[]): boolean {
 		for (let i = 0; i < filePathNames.length; i++) {
 			if (filePathNames[i].includes("..")) return false;
