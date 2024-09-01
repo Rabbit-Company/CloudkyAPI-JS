@@ -41,3 +41,20 @@ export interface FileListResponse {
 	info: string;
 	data?: FileInformation[];
 }
+
+export interface ShareLink {
+	Token: string;
+	Path: string;
+	Username?: string;
+	Password: string | null;
+	Expiration: bigint | null;
+	Downloaded: number;
+	Created: bigint;
+	Accessed: bigint;
+}
+
+export interface ShareLinkListResponse {
+	error: Error;
+	info: string;
+	links?: ShareLink[];
+}
