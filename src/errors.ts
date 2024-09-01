@@ -5,6 +5,8 @@
  * @enum {number}
  */
 export const enum Error {
+	/** Action was executed successfully. */
+	SUCCESS = 0,
 	/** Invalid API endpoint. */
 	INVALID_ENDPOINT = 404,
 	/** Bearer Token is missing in Authorization header. */
@@ -57,6 +59,8 @@ export const enum Error {
 	INVALID_SHARE_LINK = 1023,
 	/** Provided OTP is invalid. */
 	INVALID_OTP = 1024,
+	/** Provided password is too weak. */
+	PASSWORD_TOO_WEAK = 1025,
 	/** Unknown error occurred. */
 	UNKNOWN_ERROR = 2000,
 	/** Server is unreachable. */
@@ -78,6 +82,7 @@ namespace Errors {
 	 * @type {{ [key: number]: { message: string; httpCode: number } }}
 	 */
 	export const list: { [key: number]: { message: string; httpCode: number } } = {
+		0: { message: "Success", httpCode: 200 },
 		404: { message: "Invalid API endpoint", httpCode: 404 },
 		1000: { message: "Bearer Token is missing in Authorization header.", httpCode: 401 },
 		1001: { message: "Not all required data provided in json format.", httpCode: 400 },
@@ -104,6 +109,7 @@ namespace Errors {
 		1022: { message: "Share Link can not be created on non-existing file or folder.", httpCode: 400 },
 		1023: { message: "Provided share link is invalid.", httpCode: 400 },
 		1024: { message: "Provided OTP is invalid.", httpCode: 400 },
+		1025: { message: "Your password is too weak!", httpCode: 400 },
 		2000: { message: "Something went wrong while trying to perform this action. Please try again later.", httpCode: 500 },
 		5000: { message: "Server is unreachable!", httpCode: 503 },
 		9999: { message: "Your do not have permission to perform this action.", httpCode: 403 },

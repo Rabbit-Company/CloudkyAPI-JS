@@ -2,6 +2,7 @@
 var Errors;
 ((Errors) => {
   Errors.list = {
+    0: { message: "Success", httpCode: 200 },
     404: { message: "Invalid API endpoint", httpCode: 404 },
     1000: { message: "Bearer Token is missing in Authorization header.", httpCode: 401 },
     1001: { message: "Not all required data provided in json format.", httpCode: 400 },
@@ -28,6 +29,7 @@ var Errors;
     1022: { message: "Share Link can not be created on non-existing file or folder.", httpCode: 400 },
     1023: { message: "Provided share link is invalid.", httpCode: 400 },
     1024: { message: "Provided OTP is invalid.", httpCode: 400 },
+    1025: { message: "Your password is too weak!", httpCode: 400 },
     2000: { message: "Something went wrong while trying to perform this action. Please try again later.", httpCode: 500 },
     5000: { message: "Server is unreachable!", httpCode: 503 },
     9999: { message: "Your do not have permission to perform this action.", httpCode: 403 }
@@ -857,6 +859,42 @@ var Argon2id;
 })(Argon2id || (Argon2id = {}));
 var argon2id_default = Argon2id;
 
+// node_modules/@rabbit-company/password-entropy/src/password-entropy.js
+var PasswordEntropy;
+(function(PasswordEntropy2) {
+  PasswordEntropy2.lcase = "abcdefghijklmnopqrstuvwxyz";
+  PasswordEntropy2.ucase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  PasswordEntropy2.numb = "1234567890";
+  PasswordEntropy2.symbol = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ ";
+  function _includesChar(text, charlist) {
+    for (let i = 0;i < text.length; i++) {
+      if (charlist.includes(text[i]))
+        return true;
+    }
+    return false;
+  }
+  function calculate(password) {
+    if (typeof password !== "string")
+      return 0;
+    let pool = 0;
+    if (_includesChar(password, PasswordEntropy2.lcase))
+      pool += PasswordEntropy2.lcase.length;
+    if (_includesChar(password, PasswordEntropy2.ucase))
+      pool += PasswordEntropy2.ucase.length;
+    if (_includesChar(password, PasswordEntropy2.numb))
+      pool += PasswordEntropy2.numb.length;
+    if (_includesChar(password, PasswordEntropy2.symbol))
+      pool += PasswordEntropy2.symbol.length;
+    if (!_includesChar(password, PasswordEntropy2.lcase + PasswordEntropy2.ucase + PasswordEntropy2.numb + PasswordEntropy2.symbol))
+      pool += 100;
+    if (pool == 0)
+      return 0;
+    return Math.round(password.length * Math.log(pool) / Math.LN2);
+  }
+  PasswordEntropy2.calculate = calculate;
+})(PasswordEntropy || (PasswordEntropy = {}));
+var password_entropy_default = PasswordEntropy;
+
 // src/cloudky-api.ts
 class CloudkyAPI {
   server;
@@ -869,7 +907,37 @@ class CloudkyAPI {
     this.server = server;
     this.username = username;
     this.password = password;
-    this.otp = otp || "";
+    this.otp = otp;
+  }
+  static validate(server, username, password, otp) {
+    if (!validate_default.url(server))
+      return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
+    if (!validate_default.username(username))
+      return errors_default.getJson(1003 /* INVALID_USERNAME_FORMAT */);
+    if (password_entropy_default.calculate(password) < 75)
+      return errors_default.getJson(1025 /* PASSWORD_TOO_WEAK */);
+    if (!validate_default.otp(otp))
+      return errors_default.getJson(1024 /* INVALID_OTP */);
+    return errors_default.getJson(0 /* SUCCESS */);
+  }
+  validate() {
+    if (!validate_default.url(this.server))
+      return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
+    if (!validate_default.username(this.username))
+      return errors_default.getJson(1003 /* INVALID_USERNAME_FORMAT */);
+    if (!validate_default.otp(this.otp))
+      return errors_default.getJson(1024 /* INVALID_OTP */);
+    if (this.token.length) {
+      if (!validate_default.token(this.token))
+        return errors_default.getJson(1016 /* INVALID_TOKEN */);
+    } else if (this.authHash.length) {
+      if (!validate_default.password(this.authHash))
+        return errors_default.getJson(1004 /* PASSWORD_NOT_HASHED */);
+    } else if (this.password.length) {
+      if (password_entropy_default.calculate(this.password) < 75)
+        return errors_default.getJson(1013 /* INVALID_PASSWORD */);
+    }
+    return errors_default.getJson(0 /* SUCCESS */);
   }
   async initialize() {
     this.authHash = await CloudkyAPI.generateAuthenticationHash(this.username, this.password) || "";

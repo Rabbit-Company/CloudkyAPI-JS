@@ -18,6 +18,13 @@ document.getElementById("btn-create-account")?.addEventListener("click", async (
 	if (!server || !username || !email || !password) return;
 
 	latency = Date.now();
+
+	const resValidate = CloudkyAPI.validate(server.value, username.value, password.value, "");
+	if (Number(resValidate.error) !== 0) {
+		printResponse(resValidate);
+		return;
+	}
+
 	const authHash = await CloudkyAPI.generateAuthenticationHash(username.value, password.value);
 	if (!authHash) return;
 
@@ -29,7 +36,14 @@ document.getElementById("btn-get-token")?.addEventListener("click", async () => 
 	if (!server || !username || !password) return;
 
 	latency = Date.now();
-	cloudky = new CloudkyAPI(server.value, username.value, password.value, null);
+	cloudky = new CloudkyAPI(server.value, username.value, password.value, "");
+
+	const resValidate = cloudky.validate();
+	if (Number(resValidate.error) !== 0) {
+		printResponse(resValidate);
+		return;
+	}
+
 	if (!(await cloudky.initialize())) return;
 
 	const res = await cloudky.getToken();

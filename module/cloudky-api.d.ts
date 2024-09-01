@@ -1,4 +1,6 @@
 declare const enum Error$1 {
+	/** Action was executed successfully. */
+	SUCCESS = 0,
 	/** Invalid API endpoint. */
 	INVALID_ENDPOINT = 404,
 	/** Bearer Token is missing in Authorization header. */
@@ -51,6 +53,8 @@ declare const enum Error$1 {
 	INVALID_SHARE_LINK = 1023,
 	/** Provided OTP is invalid. */
 	INVALID_OTP = 1024,
+	/** Provided password is too weak. */
+	PASSWORD_TOO_WEAK = 1025,
 	/** Unknown error occurred. */
 	UNKNOWN_ERROR = 2000,
 	/** Server is unreachable. */
@@ -200,7 +204,30 @@ declare class CloudkyAPI {
 	 * @param {string} password - The password for authentication.
 	 * @param {string|null} otp - The one-time password (OTP) for two-factor authentication.
 	 */
-	constructor(server: string, username: string, password: string, otp: string | null);
+	constructor(server: string, username: string, password: string, otp: string);
+	/**
+	 * Validates the provided parameters for interacting with the Cloudky API.
+	 *
+	 * This method checks the validity of the server URL, username, password strength, and OTP.
+	 * It returns an appropriate error response if any of the validations fail.
+	 *
+	 * @static
+	 * @param {string} server - The URL of the server to connect to.
+	 * @param {string} username - The username for authentication.
+	 * @param {string} password - The password for authentication.
+	 * @param {string|null} otp - The one-time password (OTP) for two-factor authentication.
+	 * @returns {StandardResponse} The validation response indicating success or error.
+	 */
+	static validate(server: string, username: string, password: string, otp: string): StandardResponse;
+	/**
+	 * Validates the current instance's properties for interacting with the Cloudky API.
+	 *
+	 * This method checks the validity of the server URL, username, OTP, and depending on the state,
+	 * either the token, authHash, or password. It returns an appropriate error response if any of the validations fail.
+	 *
+	 * @returns {StandardResponse} The validation response indicating success or error.
+	 */
+	validate(): StandardResponse;
 	/**
 	 * Initializes the CloudkyAPI instance by generating the authentication hash.
 	 * This method sets the `authHash` property based on the provided username and password,

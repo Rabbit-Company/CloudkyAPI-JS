@@ -3,6 +3,7 @@ import type { StandardResponse, AccountTokenResponse, AccountDataResponse, FileL
 import Validate from "./validate";
 import Blake2b from "@rabbit-company/blake2b";
 import Argon2id from "@rabbit-company/argon2id";
+import PasswordEntropy from "@rabbit-company/password-entropy";
 
 /**
  * Class for interacting with the Cloudky API.
@@ -27,11 +28,57 @@ class CloudkyAPI {
 	 * @param {string} password - The password for authentication.
 	 * @param {string|null} otp - The one-time password (OTP) for two-factor authentication.
 	 */
-	constructor(server: string, username: string, password: string, otp: string | null) {
+	constructor(server: string, username: string, password: string, otp: string) {
 		this.server = server;
 		this.username = username;
 		this.password = password;
-		this.otp = otp || "";
+		this.otp = otp;
+	}
+
+	/**
+	 * Validates the provided parameters for interacting with the Cloudky API.
+	 *
+	 * This method checks the validity of the server URL, username, password strength, and OTP.
+	 * It returns an appropriate error response if any of the validations fail.
+	 *
+	 * @static
+	 * @param {string} server - The URL of the server to connect to.
+	 * @param {string} username - The username for authentication.
+	 * @param {string} password - The password for authentication.
+	 * @param {string|null} otp - The one-time password (OTP) for two-factor authentication.
+	 * @returns {StandardResponse} The validation response indicating success or error.
+	 */
+	static validate(server: string, username: string, password: string, otp: string): StandardResponse {
+		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
+		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
+		if (PasswordEntropy.calculate(password) < 75) return Errors.getJson(Error.PASSWORD_TOO_WEAK);
+		if (!Validate.otp(otp)) return Errors.getJson(Error.INVALID_OTP);
+
+		return Errors.getJson(Error.SUCCESS);
+	}
+
+	/**
+	 * Validates the current instance's properties for interacting with the Cloudky API.
+	 *
+	 * This method checks the validity of the server URL, username, OTP, and depending on the state,
+	 * either the token, authHash, or password. It returns an appropriate error response if any of the validations fail.
+	 *
+	 * @returns {StandardResponse} The validation response indicating success or error.
+	 */
+	validate(): StandardResponse {
+		if (!Validate.url(this.server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
+		if (!Validate.username(this.username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
+		if (!Validate.otp(this.otp)) return Errors.getJson(Error.INVALID_OTP);
+
+		if (this.token.length) {
+			if (!Validate.token(this.token)) return Errors.getJson(Error.INVALID_TOKEN);
+		} else if (this.authHash.length) {
+			if (!Validate.password(this.authHash)) return Errors.getJson(Error.PASSWORD_NOT_HASHED);
+		} else if (this.password.length) {
+			if (PasswordEntropy.calculate(this.password) < 75) return Errors.getJson(Error.INVALID_PASSWORD);
+		}
+
+		return Errors.getJson(Error.SUCCESS);
 	}
 
 	/**
