@@ -29,3 +29,15 @@ export interface AccountDataResponse {
 	info: string;
 	data?: AccountData;
 }
+
+export interface FileInformation {
+	Key: string;
+	Modified: number;
+	Size: number;
+}
+
+export interface FileListResponse {
+	error: Error;
+	info: string;
+	data?: FileInformation[];
+}

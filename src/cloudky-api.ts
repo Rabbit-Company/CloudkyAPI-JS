@@ -1,5 +1,5 @@
 import Errors, { Error } from "./errors";
-import type { StandardResponse, AccountTokenResponse, AccountDataResponse } from "./types";
+import type { StandardResponse, AccountTokenResponse, AccountDataResponse, FileListResponse } from "./types";
 import Validate from "./validate";
 
 namespace CloudkyAPI {
@@ -112,27 +112,27 @@ namespace CloudkyAPI {
 		}
 	}
 
-	export async function getFileList(server: string, username: string, token: string): Promise<any> {
-		if (!Validate.url(server)) throw "url_invalid";
-		if (!Validate.username(username)) throw "12";
-		if (!Validate.token(token)) throw "25";
+	export async function getFileList(server: string, username: string, token: string): Promise<FileListResponse> {
+		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
+		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
+		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
 
 		try {
-			let headers = new Headers();
-			headers.append("Authorization", "Basic " + btoa(username + ":" + token));
-
 			const result = await fetch(server + "/v1/file/list", {
 				method: "GET",
-				headers: headers,
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Basic ${btoa(username + ":" + token)}`,
+				},
 			});
 
-			if (result.status !== 200 && result.status !== 429) {
-				throw "server_unreachable";
-			}
+			const response: FileListResponse = await result.json();
+			if (Validate.response(response)) return response;
 
-			return await result.json();
-		} catch {
-			throw "server_unreachable";
+			return Errors.getJson(Error.UNKNOWN_ERROR);
+		} catch (err) {
+			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
+			return Errors.getJson(Error.SERVER_UNREACHABLE);
 		}
 	}
 
