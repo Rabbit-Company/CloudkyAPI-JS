@@ -76,6 +76,10 @@ namespace Validate {
 	export function expiration(expiration: bigint | number): boolean {
 		return Number(expiration) > Date.now();
 	}
+
+	export function sharelink(id: string): boolean {
+		return /^([A-Za-z0-9]{15})$/.test(id);
+	}
 }
 
 export default Validate;
