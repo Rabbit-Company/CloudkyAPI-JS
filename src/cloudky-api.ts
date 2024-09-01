@@ -278,7 +278,6 @@ namespace CloudkyAPI {
 			const result = await fetch(server + "/v1/file/upload", {
 				method: "PUT",
 				headers: {
-					"Content-Type": "application/json",
 					Authorization: `Basic ${btoa(username + ":" + token)}`,
 				},
 				body: formData,
