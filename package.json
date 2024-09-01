@@ -1,6 +1,6 @@
 {
 	"name": "@rabbit-company/cloudky-api",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"description": "API for Cloudky Server",
 	"main": "./module/cloudky-api.js",
 	"browser": "./module/cloudky-api.js",
@@ -42,6 +42,7 @@
 		"typescript": "^5.5.4"
 	},
 	"dependencies": {
-		"@rabbit-company/blake2b": "npm:@jsr/rabbit-company__blake2b@2.1.1"
+		"@rabbit-company/argon2id": "npm:@jsr/rabbit-company__argon2id",
+		"@rabbit-company/blake2b": "npm:@jsr/rabbit-company__blake2b"
 	}
 }

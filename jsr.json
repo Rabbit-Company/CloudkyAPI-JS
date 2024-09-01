@@ -1,0 +1,8 @@
+{
+	"name": "@rabbit-company/cloudky-api",
+	"version": "0.0.1",
+	"exports": "./src/cloudky-api.ts",
+	"publish": {
+		"include": ["LICENSE", "README.md", "src/cloudky-api.ts"]
+	}
+}

@@ -1,14 +1,75 @@
 import Errors, { Error } from "./errors";
 import type { StandardResponse, AccountTokenResponse, AccountDataResponse, FileListResponse, ShareLinkListResponse } from "./types";
 import Validate from "./validate";
+import Blake2b from "@rabbit-company/blake2b";
+import Argon2id from "@rabbit-company/argon2id";
 
 /**
- * Namespace for interacting with the Cloudky API.
+ * Class for interacting with the Cloudky API.
  *
- * This namespace provides functions for managing accounts, files, and shareable links
+ * This class provides functions for managing accounts, files, and shareable links
  * via HTTP requests to the Cloudky server.
  */
-namespace CloudkyAPI {
+class CloudkyAPI {
+	server: string;
+	username: string;
+	private password: string;
+	private otp: string;
+	private authHash: string = "";
+	token: string = "";
+
+	/**
+	 * Creates an instance of CloudkyAPI.
+	 *
+	 * @constructor
+	 * @param {string} server - The URL of the server to connect to.
+	 * @param {string} username - The username for authentication.
+	 * @param {string} password - The password for authentication.
+	 * @param {string|null} otp - The one-time password (OTP) for two-factor authentication.
+	 */
+	constructor(server: string, username: string, password: string, otp: string | null) {
+		this.server = server;
+		this.username = username;
+		this.password = password;
+		this.otp = otp || "";
+	}
+
+	/**
+	 * Initializes the CloudkyAPI instance by generating the authentication hash.
+	 * This method sets the `authHash` property based on the provided username and password,
+	 * and clears the password from memory if the hash is successfully generated.
+	 *
+	 * @returns {Promise<boolean>} A promise that resolves to `true` if the `authHash` is successfully generated, otherwise `false`.
+	 */
+	async initialize(): Promise<boolean> {
+		this.authHash = (await CloudkyAPI.generateAuthenticationHash(this.username, this.password)) || "";
+		if (this.authHash.length) {
+			this.password = "";
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Generates a hashed authentication string using the provided username and password.
+	 * This method uses Blake2b to create a unique hash and Argon2id for further hashing
+	 * to enhance security.
+	 *
+	 * @param {string} username - The username for authentication.
+	 * @param {string} password - The password for authentication.
+	 * @returns {Promise<string|null>} A promise that resolves to the authentication hash if successful, or `null` if an error occurs during hashing.
+	 */
+	static async generateAuthenticationHash(username: string, password: string): Promise<string | null> {
+		const authHash = Blake2b.hash(`cloudky2024-${password}-${username}`);
+		const authSalt = Blake2b.hash(`cloudky2024-${username}`);
+
+		try {
+			return await Argon2id.hash(authHash, authSalt, 4, 16, 3, 64);
+		} catch {
+			return null;
+		}
+	}
+
 	/**
 	 * Creates a new account on the specified server.
 	 *
@@ -19,7 +80,7 @@ namespace CloudkyAPI {
 	 * @param {number} type - The account type (0 for standard, 1 for file E2EE).
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object.
 	 */
-	export async function createAccount(server: string, username: string, email: string, password: string, type: number): Promise<StandardResponse> {
+	static async createAccount(server: string, username: string, email: string, password: string, type: number): Promise<StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.email(email)) return Errors.getJson(Error.INVALID_EMAIL);
@@ -59,7 +120,7 @@ namespace CloudkyAPI {
 	 * @param {string} otp - An optional one-time password (OTP) for two-factor authentication.
 	 * @returns {Promise<AccountTokenResponse>} A promise that resolves to the account token response object.
 	 */
-	export async function getToken(server: string, username: string, password: string, otp: string): Promise<AccountTokenResponse> {
+	static async getToken(server: string, username: string, password: string, otp: string): Promise<AccountTokenResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.password(password)) return Errors.getJson(Error.PASSWORD_NOT_HASHED);
@@ -90,6 +151,21 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Retrieves a token for the current account instance using stored credentials and optional OTP.
+	 * Clears authHash from memory once the token is successfully retrieved.
+	 *
+	 * @returns {Promise<AccountTokenResponse>} A promise that resolves to the account token response object.
+	 */
+	async getToken(): Promise<AccountTokenResponse> {
+		const res = await CloudkyAPI.getToken(this.server, this.username, this.authHash, this.otp);
+		if (res.token) {
+			this.token = res.token;
+			this.authHash = "";
+		}
+		return res;
+	}
+
+	/**
 	 * Retrieves account data for the specified username and token.
 	 *
 	 * @param {string} server - The URL of the server where the account data will be retrieved.
@@ -97,7 +173,7 @@ namespace CloudkyAPI {
 	 * @param {string} token - The token for authenticating the request.
 	 * @returns {Promise<AccountDataResponse>} A promise that resolves to the account data response object.
 	 */
-	export async function getAccountData(server: string, username: string, token: string): Promise<AccountDataResponse> {
+	static async getAccountData(server: string, username: string, token: string): Promise<AccountDataResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -121,6 +197,15 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Retrieves account data for the current instance's username.
+	 *
+	 * @returns {Promise<AccountDataResponse>} A promise that resolves to the account data response object.
+	 */
+	async getAccountData(): Promise<AccountDataResponse> {
+		return await CloudkyAPI.getAccountData(this.server, this.username, this.token);
+	}
+
+	/**
 	 * Deletes an existing account from the server.
 	 *
 	 * @param {string} server - The URL of the server where the account will be deleted.
@@ -128,7 +213,7 @@ namespace CloudkyAPI {
 	 * @param {string} token - The token for authenticating the request.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object.
 	 */
-	export async function deleteAccount(server: string, username: string, token: string): Promise<StandardResponse> {
+	static async deleteAccount(server: string, username: string, token: string): Promise<StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -153,6 +238,15 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Deletes an existing account from the server.
+	 *
+	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object.
+	 */
+	async deleteAccount(): Promise<StandardResponse> {
+		return await CloudkyAPI.deleteAccount(this.server, this.username, this.token);
+	}
+
+	/**
 	 * Retrieves a list of files from the server.
 	 *
 	 * @param {string} server - The URL of the server to fetch the file list from.
@@ -160,7 +254,7 @@ namespace CloudkyAPI {
 	 * @param {string} token - The token for authenticating the request.
 	 * @returns {Promise<FileListResponse>} A promise that resolves to the file list response object, which includes the list of files or an error message.
 	 */
-	export async function getFileList(server: string, username: string, token: string): Promise<FileListResponse> {
+	static async getFileList(server: string, username: string, token: string): Promise<FileListResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -184,6 +278,15 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Retrieves a list of files from the server.
+	 *
+	 * @returns {Promise<FileListResponse>} A promise that resolves to the file list response object, which includes the list of files or an error message.
+	 */
+	async getFileList(): Promise<FileListResponse> {
+		return await CloudkyAPI.getFileList(this.server, this.username, this.token);
+	}
+
+	/**
 	 * Deletes specified files from the server.
 	 *
 	 * @param {string} server - The URL of the server where the files will be deleted.
@@ -192,7 +295,7 @@ namespace CloudkyAPI {
 	 * @param {string[]} paths - An array of file paths to be deleted.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the delete operation.
 	 */
-	export async function deleteFiles(server: string, username: string, token: string, paths: string[]): Promise<StandardResponse> {
+	static async deleteFiles(server: string, username: string, token: string, paths: string[]): Promise<StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -223,6 +326,16 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Deletes specified files from the server.
+	 *
+	 * @param {string[]} paths - An array of file paths to be deleted.
+	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the delete operation.
+	 */
+	async deleteFiles(paths: string[]): Promise<StandardResponse> {
+		return await CloudkyAPI.deleteFiles(this.server, this.username, this.token, paths);
+	}
+
+	/**
 	 * Downloads a file from the server.
 	 *
 	 * @param {string} server - The URL of the server from which to download the file.
@@ -231,7 +344,7 @@ namespace CloudkyAPI {
 	 * @param {string} path - The path of the file to be downloaded.
 	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
 	 */
-	export async function downloadFile(server: string, username: string, token: string, path: string): Promise<Blob | StandardResponse> {
+	static async downloadFile(server: string, username: string, token: string, path: string): Promise<Blob | StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -265,6 +378,16 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Downloads a file from the server.
+	 *
+	 * @param {string} path - The path of the file to be downloaded.
+	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
+	 */
+	async downloadFile(path: string): Promise<Blob | StandardResponse> {
+		return await CloudkyAPI.downloadFile(this.server, this.username, this.token, path);
+	}
+
+	/**
 	 * Moves specified files to a new destination on the server.
 	 *
 	 * @param {string} server - The URL of the server where the files will be moved.
@@ -274,7 +397,7 @@ namespace CloudkyAPI {
 	 * @param {string} destination - The destination path where the files will be moved.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the move operation.
 	 */
-	export async function moveFiles(server: string, username: string, token: string, files: string[], destination: string): Promise<StandardResponse> {
+	static async moveFiles(server: string, username: string, token: string, files: string[], destination: string): Promise<StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -307,6 +430,17 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Moves specified files to a new destination on the server.
+	 *
+	 * @param {string[]} files - An array of file paths to be moved.
+	 * @param {string} destination - The destination path where the files will be moved.
+	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the move operation.
+	 */
+	async moveFiles(files: string[], destination: string): Promise<StandardResponse> {
+		return await CloudkyAPI.moveFiles(this.server, this.username, this.token, files, destination);
+	}
+
+	/**
 	 * Renames a file on the server.
 	 *
 	 * @param {string} server - The URL of the server where the file will be renamed.
@@ -316,7 +450,7 @@ namespace CloudkyAPI {
 	 * @param {string} destination - The new path (including filename) of the file.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the rename operation.
 	 */
-	export async function renameFile(server: string, username: string, token: string, path: string, destination: string): Promise<StandardResponse> {
+	static async renameFile(server: string, username: string, token: string, path: string, destination: string): Promise<StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -349,6 +483,17 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Renames a file on the server.
+	 *
+	 * @param {string} path - The current path of the file to be renamed.
+	 * @param {string} destination - The new path (including filename) of the file.
+	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the rename operation.
+	 */
+	async renameFile(path: string, destination: string): Promise<StandardResponse> {
+		return await CloudkyAPI.renameFile(this.server, this.username, this.token, path, destination);
+	}
+
+	/**
 	 * Uploads a file to the server.
 	 *
 	 * @param {string} server - The URL of the server where the file will be uploaded.
@@ -358,7 +503,7 @@ namespace CloudkyAPI {
 	 * @param {Blob} fileContent - The content of the file to be uploaded.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the upload operation.
 	 */
-	export async function uploadFile(server: string, username: string, token: string, destination: string, fileContent: Blob): Promise<StandardResponse> {
+	static async uploadFile(server: string, username: string, token: string, destination: string, fileContent: Blob): Promise<StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -389,6 +534,17 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Uploads a file to the server.
+	 *
+	 * @param {string} destination - The destination path where the file will be uploaded.
+	 * @param {Blob} fileContent - The content of the file to be uploaded.
+	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the upload operation.
+	 */
+	async uploadFile(destination: string, fileContent: Blob): Promise<StandardResponse> {
+		return await CloudkyAPI.uploadFile(this.server, this.username, this.token, destination, fileContent);
+	}
+
+	/**
 	 * Creates a shareable link for a file or folder.
 	 *
 	 * @param {string} server - The URL of the server where the share link will be created.
@@ -399,7 +555,7 @@ namespace CloudkyAPI {
 	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
 	 */
-	export async function shareLinkCreate(
+	static async shareLinkCreate(
 		server: string,
 		username: string,
 		token: string,
@@ -441,6 +597,18 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Creates a shareable link for a file or folder.
+	 *
+	 * @param {string} path - The path of the file or folder to share.
+	 * @param {string | null} password - Optional password for accessing the share link.
+	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
+	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
+	 */
+	async shareLinkCreate(path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse> {
+		return await CloudkyAPI.shareLinkCreate(this.server, this.username, this.token, path, password, expiration);
+	}
+
+	/**
 	 * Deletes a shareable link.
 	 *
 	 * @param {string} server - The URL of the server where the share link will be deleted.
@@ -449,7 +617,7 @@ namespace CloudkyAPI {
 	 * @param {string} link - The share link to be deleted.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link deletion operation.
 	 */
-	export async function shareLinkDelete(server: string, username: string, token: string, link: string): Promise<StandardResponse> {
+	static async shareLinkDelete(server: string, username: string, token: string, link: string): Promise<StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -480,6 +648,16 @@ namespace CloudkyAPI {
 	}
 
 	/**
+	 * Deletes a shareable link.
+	 *
+	 * @param {string} link - The share link to be deleted.
+	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link deletion operation.
+	 */
+	async shareLinkDelete(link: string): Promise<StandardResponse> {
+		return await CloudkyAPI.shareLinkDelete(this.server, this.username, this.token, link);
+	}
+
+	/**
 	 * Retrieves a list of shareable links created by the account.
 	 *
 	 * @param {string} server - The URL of the server from which to fetch the list of shareable links.
@@ -487,7 +665,7 @@ namespace CloudkyAPI {
 	 * @param {string} token - The token for authenticating the request.
 	 * @returns {Promise<ShareLinkListResponse>} A promise that resolves to the share link list response object, which includes a list of shareable links or an error message.
 	 */
-	export async function shareLinkList(server: string, username: string, token: string): Promise<ShareLinkListResponse> {
+	static async shareLinkList(server: string, username: string, token: string): Promise<ShareLinkListResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -508,6 +686,15 @@ namespace CloudkyAPI {
 			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
 			return Errors.getJson(Error.SERVER_UNREACHABLE);
 		}
+	}
+
+	/**
+	 * Retrieves a list of shareable links created by the account.
+	 *
+	 * @returns {Promise<ShareLinkListResponse>} A promise that resolves to the share link list response object, which includes a list of shareable links or an error message.
+	 */
+	async shareLinkList(): Promise<ShareLinkListResponse> {
+		return await CloudkyAPI.shareLinkList(this.server, this.username, this.token);
 	}
 }
 
