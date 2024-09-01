@@ -262,6 +262,37 @@ namespace CloudkyAPI {
 			return Errors.getJson(Error.SERVER_UNREACHABLE);
 		}
 	}
+
+	export async function uploadFile(server: string, username: string, token: string, destination: string, fileContent: Blob): Promise<StandardResponse> {
+		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
+		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
+		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
+		if (!Validate.userFilePathName(destination)) return Errors.getJson(Error.INVALID_FILE_NAME);
+		if (fileContent.size === 0) return Errors.getJson(Error.INVALID_FILE);
+		if (fileContent.size > 53_687_091_200) return Errors.getJson(Error.MAX_FILE_SIZE_EXCEEDED);
+
+		try {
+			const formData = new FormData();
+			formData.append("file", fileContent, destination);
+
+			const result = await fetch(server + "/v1/file/upload", {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Basic ${btoa(username + ":" + token)}`,
+				},
+				body: formData,
+			});
+
+			const response: StandardResponse = await result.json();
+			if (Validate.response(response)) return response;
+
+			return Errors.getJson(Error.UNKNOWN_ERROR);
+		} catch (err) {
+			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
+			return Errors.getJson(Error.SERVER_UNREACHABLE);
+		}
+	}
 }
 
 export default CloudkyAPI;
