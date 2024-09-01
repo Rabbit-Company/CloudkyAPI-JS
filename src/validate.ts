@@ -72,6 +72,10 @@ namespace Validate {
 		}
 		return true;
 	}
+
+	export function expiration(expiration: bigint | number): boolean {
+		return Number(expiration) > Date.now();
+	}
 }
 
 export default Validate;

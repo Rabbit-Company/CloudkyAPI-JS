@@ -292,6 +292,47 @@ namespace CloudkyAPI {
 			return Errors.getJson(Error.SERVER_UNREACHABLE);
 		}
 	}
+
+	export async function shareLinkCreate(
+		server: string,
+		username: string,
+		token: string,
+		path: string,
+		password: string | null,
+		expiration: bigint | number | null
+	): Promise<StandardResponse> {
+		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
+		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
+		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
+		if (!Validate.userFilePathName(path)) return Errors.getJson(Error.INVALID_FILE_NAME);
+		if (password !== null && !Validate.password(password)) return Errors.getJson(Error.PASSWORD_NOT_HASHED);
+		if (expiration !== null && !Validate.expiration(expiration)) return Errors.getJson(Error.INVALID_EXPIRATION_TIMESTAMP);
+
+		try {
+			const data = {
+				path: path,
+				password: password,
+				expiration: expiration,
+			};
+
+			const result = await fetch(server + "/v1/sharelink/create", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Basic ${btoa(username + ":" + token)}`,
+				},
+				body: JSON.stringify(data),
+			});
+
+			const response: StandardResponse = await result.json();
+			if (Validate.response(response)) return response;
+
+			return Errors.getJson(Error.UNKNOWN_ERROR);
+		} catch (err) {
+			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
+			return Errors.getJson(Error.SERVER_UNREACHABLE);
+		}
+	}
 }
 
 export default CloudkyAPI;
