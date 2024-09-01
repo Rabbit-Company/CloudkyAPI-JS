@@ -230,6 +230,38 @@ namespace CloudkyAPI {
 			return Errors.getJson(Error.SERVER_UNREACHABLE);
 		}
 	}
+
+	export async function renameFile(server: string, username: string, token: string, path: string, destination: string): Promise<StandardResponse> {
+		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
+		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
+		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
+		if (!Validate.userFilePathName(path)) return Errors.getJson(Error.INVALID_FILE_NAME);
+		if (!Validate.userFilePathName(destination)) return Errors.getJson(Error.INVALID_FILE_NAME);
+
+		try {
+			const data = {
+				path: path,
+				destination: destination,
+			};
+
+			const result = await fetch(server + "/v1/file/rename", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Basic ${btoa(username + ":" + token)}`,
+				},
+				body: JSON.stringify(data),
+			});
+
+			const response: StandardResponse = await result.json();
+			if (Validate.response(response)) return response;
+
+			return Errors.getJson(Error.UNKNOWN_ERROR);
+		} catch (err) {
+			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
+			return Errors.getJson(Error.SERVER_UNREACHABLE);
+		}
+	}
 }
 
 export default CloudkyAPI;
