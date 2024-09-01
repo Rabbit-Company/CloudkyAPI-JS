@@ -190,7 +190,7 @@ declare class CloudkyAPI {
 	private password;
 	private otp;
 	private authHash;
-	private token;
+	token: string;
 	/**
 	 * Creates an instance of CloudkyAPI.
 	 *
