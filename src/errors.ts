@@ -1,4 +1,4 @@
-export enum Error {
+export const enum Error {
 	INVALID_ENDPOINT = 404,
 	BEARER_TOKEN_MISSING = 1000,
 	REQUIRED_DATA_MISSING = 1001,
