@@ -1,4 +1,4 @@
-import { CloudkyAPI, type StandardResponse } from "./cloudky-api";
+import { CloudkyAPI, Error, type StandardResponse } from "./cloudky-api";
 
 const server = document.getElementById("server") as HTMLInputElement;
 const username = document.getElementById("username") as HTMLInputElement;
@@ -19,7 +19,7 @@ document.getElementById("btn-create-account")?.addEventListener("click", async (
 	latency = Date.now();
 
 	const resValidate = CloudkyAPI.validate(server.value, username.value, password.value, "");
-	if (Number(resValidate.error) !== 0) {
+	if (resValidate.error !== Error.SUCCESS) {
 		printResponse(resValidate);
 		return;
 	}
@@ -38,7 +38,7 @@ document.getElementById("btn-get-token")?.addEventListener("click", async () => 
 	cloudky = new CloudkyAPI(server.value, username.value, password.value, "");
 
 	const resValidate = cloudky.validate();
-	if (Number(resValidate.error) !== 0) {
+	if (resValidate.error !== Error.SUCCESS) {
 		printResponse(resValidate);
 		return;
 	}
@@ -58,6 +58,17 @@ document.getElementById("btn-get-account-data")?.addEventListener("click", async
 	latency = Date.now();
 	const res = await cloudky.getAccountData();
 	printResponse(res);
+});
+
+document.getElementById("btn-delete-account")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.deleteAccount();
+	printResponse(res);
+
+	if (res.error === Error.SUCCESS) {
+		if (loginPage) loginPage.style.display = "block";
+		if (loggedInPage) loggedInPage.style.display = "none";
+	}
 });
 
 function printResponse(response: StandardResponse) {
