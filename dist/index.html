@@ -51,7 +51,7 @@
 
 			<div id="login-page">
 				<label for="server">Server:</label>
-				<input id="server" type="text" /><br /><br />
+				<input id="server" type="text" value="http://localhost:8085" /><br /><br />
 
 				<label for="username">Username:</label>
 				<input id="username" type="text" /><br /><br />
@@ -67,8 +67,27 @@
 			</div>
 
 			<div id="loggedin-page" style="display: none">
-				<button id="btn-get-account-data">Get Account Data</button>
-				<button id="btn-delete-account">Delete Account</button>
+				<h4>Account</h4>
+				<div>
+					<button id="btn-get-account-data">Get Data</button>
+					<button id="btn-delete-account">Delete</button>
+				</div>
+
+				<h4>Share Link</h4>
+				<div>
+					<label for="sharelink-path">Path:</label>
+					<input id="sharelink-path" type="text" /><br /><br />
+
+					<label for="sharelink-password">Password:</label>
+					<input id="sharelink-password" type="password" /><br /><br />
+
+					<label for="sharelink-expiration">Expiration:</label>
+					<input type="datetime-local" id="sharelink-expiration" />
+
+					<button id="btn-sharelink-create">Create</button>
+					<button id="btn-sharelink-list">List</button>
+					<button id="btn-sharelink-delete">Delete</button>
+				</div>
 			</div>
 		</div>
 		<div id="responses" class="right-div"></div>

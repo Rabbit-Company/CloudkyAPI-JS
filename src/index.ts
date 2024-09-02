@@ -6,12 +6,19 @@ const email = document.getElementById("email") as HTMLInputElement;
 const password = document.getElementById("password") as HTMLInputElement;
 const responses = document.getElementById("responses");
 
+const sharelinkID = document.getElementById("sharelink-id") as HTMLInputElement;
+const sharelinkExpiration = document.getElementById("sharelink-expiration") as HTMLInputElement;
+
 const loginPage = document.getElementById("login-page");
 const loggedInPage = document.getElementById("loggedin-page");
 
 let cloudky: CloudkyAPI;
 let counter = 1;
 let latency = Date.now();
+
+if (sharelinkExpiration) {
+	sharelinkExpiration.value = new Date().toISOString().slice(0, 16);
+}
 
 document.getElementById("btn-create-account")?.addEventListener("click", async () => {
 	if (!server || !username || !email || !password) return;
@@ -69,6 +76,18 @@ document.getElementById("btn-delete-account")?.addEventListener("click", async (
 		if (loginPage) loginPage.style.display = "block";
 		if (loggedInPage) loggedInPage.style.display = "none";
 	}
+});
+
+document.getElementById("btn-sharelink-list")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.listShareLinks();
+	printResponse(res);
+});
+
+document.getElementById("btn-sharelink-delete")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.deleteShareLink(sharelinkID.value);
+	printResponse(res);
 });
 
 function printResponse(response: StandardResponse) {

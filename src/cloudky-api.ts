@@ -310,7 +310,7 @@ class CloudkyAPI {
 	 * @param {string} token - The token for authenticating the request.
 	 * @returns {Promise<FileListResponse>} A promise that resolves to the file list response object, which includes the list of files or an error message.
 	 */
-	static async getFileList(server: string, username: string, token: string): Promise<FileListResponse> {
+	static async listFiles(server: string, username: string, token: string): Promise<FileListResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -338,8 +338,8 @@ class CloudkyAPI {
 	 *
 	 * @returns {Promise<FileListResponse>} A promise that resolves to the file list response object, which includes the list of files or an error message.
 	 */
-	async getFileList(): Promise<FileListResponse> {
-		return await CloudkyAPI.getFileList(this.server, this.username, this.token);
+	async listFiles(): Promise<FileListResponse> {
+		return await CloudkyAPI.listFiles(this.server, this.username, this.token);
 	}
 
 	/**
@@ -611,7 +611,7 @@ class CloudkyAPI {
 	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
 	 */
-	static async shareLinkCreate(
+	static async createShareLink(
 		server: string,
 		username: string,
 		token: string,
@@ -660,8 +660,8 @@ class CloudkyAPI {
 	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
 	 */
-	async shareLinkCreate(path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse> {
-		return await CloudkyAPI.shareLinkCreate(this.server, this.username, this.token, path, password, expiration);
+	async createShareLink(path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse> {
+		return await CloudkyAPI.createShareLink(this.server, this.username, this.token, path, password, expiration);
 	}
 
 	/**
@@ -673,7 +673,7 @@ class CloudkyAPI {
 	 * @param {string} link - The share link to be deleted.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link deletion operation.
 	 */
-	static async shareLinkDelete(server: string, username: string, token: string, link: string): Promise<StandardResponse> {
+	static async deleteShareLink(server: string, username: string, token: string, link: string): Promise<StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -709,8 +709,8 @@ class CloudkyAPI {
 	 * @param {string} link - The share link to be deleted.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link deletion operation.
 	 */
-	async shareLinkDelete(link: string): Promise<StandardResponse> {
-		return await CloudkyAPI.shareLinkDelete(this.server, this.username, this.token, link);
+	async deleteShareLink(link: string): Promise<StandardResponse> {
+		return await CloudkyAPI.deleteShareLink(this.server, this.username, this.token, link);
 	}
 
 	/**
@@ -721,7 +721,7 @@ class CloudkyAPI {
 	 * @param {string} token - The token for authenticating the request.
 	 * @returns {Promise<ShareLinkListResponse>} A promise that resolves to the share link list response object, which includes a list of shareable links or an error message.
 	 */
-	static async shareLinkList(server: string, username: string, token: string): Promise<ShareLinkListResponse> {
+	static async listShareLinks(server: string, username: string, token: string): Promise<ShareLinkListResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -749,8 +749,8 @@ class CloudkyAPI {
 	 *
 	 * @returns {Promise<ShareLinkListResponse>} A promise that resolves to the share link list response object, which includes a list of shareable links or an error message.
 	 */
-	async shareLinkList(): Promise<ShareLinkListResponse> {
-		return await CloudkyAPI.shareLinkList(this.server, this.username, this.token);
+	async listShareLinks(): Promise<ShareLinkListResponse> {
+		return await CloudkyAPI.listShareLinks(this.server, this.username, this.token);
 	}
 }
 

@@ -8,22 +8,22 @@ const link = "OXyoefGEI1VepwJ";
 
 describe("sharelink delete", () => {
 	test("invalid server", async () => {
-		const res: StandardResponse = await CloudkyAPI.shareLinkDelete("invalid server", username, token, link);
+		const res: StandardResponse = await CloudkyAPI.deleteShareLink("invalid server", username, token, link);
 		expect(res.error).toBe(Error.SERVER_UNREACHABLE);
 	});
 
 	test("invalid username", async () => {
-		const res: StandardResponse = await CloudkyAPI.shareLinkDelete(server, "test.test123", token, link);
+		const res: StandardResponse = await CloudkyAPI.deleteShareLink(server, "test.test123", token, link);
 		expect(res.error).toBe(Error.INVALID_USERNAME_FORMAT);
 	});
 
 	test("invalid token", async () => {
-		const res: StandardResponse = await CloudkyAPI.shareLinkDelete(server, username, "test", link);
+		const res: StandardResponse = await CloudkyAPI.deleteShareLink(server, username, "test", link);
 		expect(res.error).toBe(Error.INVALID_TOKEN);
 	});
 
 	test("invalid share link", async () => {
-		const res: StandardResponse = await CloudkyAPI.shareLinkDelete(server, username, token, "h8fsnal");
+		const res: StandardResponse = await CloudkyAPI.deleteShareLink(server, username, token, "h8fsnal");
 		expect(res.error).toBe(Error.INVALID_SHARE_LINK);
 	});
 });
