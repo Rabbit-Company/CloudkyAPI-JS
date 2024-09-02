@@ -18,7 +18,7 @@ import { CloudkyAPI, Errors, Validate, StandardResponse } from "@rabbit-company/
 
 If you are using TypeScript, you can also import specific types for better type checking:
 
-```js
+```ts
 import type { AccountDataResponse, AccountTokenResponse } from "@rabbit-company/cloudky-api";
 ```
 
