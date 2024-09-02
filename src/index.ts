@@ -1,5 +1,4 @@
-import CloudkyAPI from "./cloudky-api";
-import type { StandardResponse } from "./types";
+import { CloudkyAPI, type StandardResponse } from "./cloudky-api";
 
 const server = document.getElementById("server") as HTMLInputElement;
 const username = document.getElementById("username") as HTMLInputElement;

@@ -1,3 +1,13 @@
+import Argon2id from '@rabbit-company/argon2id';
+import Blake2b from '@rabbit-company/blake2b';
+import PasswordEntropy from '@rabbit-company/password-entropy';
+
+/**
+ * Enum representing various error codes used throughout the application.
+ * Each error code corresponds to a specific error message.
+ * @readonly
+ * @enum {number}
+ */
 declare const enum Error$1 {
 	/** Action was executed successfully. */
 	SUCCESS = 0,
@@ -63,6 +73,41 @@ declare const enum Error$1 {
 	INVALID_RESPONSE_FORMAT = 5001,
 	/** Insufficient permissions to perform this action. */
 	INSUFFICIENT_PERMISSIONS = 9999
+}
+/**
+ * Namespace containing error handling utilities.
+ * Provides methods to retrieve error details and format error responses in JSON.
+ * @namespace
+ */
+export declare namespace Errors {
+	/**
+	 * A dictionary mapping error codes to their corresponding messages and HTTP status codes.
+	 * @type {{ [key: number]: { message: string; httpCode: number } }}
+	 */
+	const list: {
+		[key: number]: {
+			message: string;
+			httpCode: number;
+		};
+	};
+	/**
+	 * Retrieves the error details for a given error code.
+	 * @param {Error} id - The error code to retrieve details for.
+	 * @returns {{ message: string; httpCode: number }} An object containing the error message and HTTP status code.
+	 */
+	function get(id: Error$1): {
+		message: string;
+		httpCode: number;
+	};
+	/**
+	 * Formats the error response as a JSON object.
+	 * @param {Error} id - The error code to format.
+	 * @returns {{ error: Error, info: string }} A JSON object containing the error code and message.
+	 */
+	function getJson(id: Error$1): {
+		error: Error$1;
+		info: string;
+	};
 }
 /**
  * Represents a standard response structure with an error code and information message.
@@ -183,12 +228,158 @@ export interface ShareLinkListResponse {
 	links?: ShareLink[];
 }
 /**
+ * The `Validate` namespace provides a collection of validation functions
+ * used to verify the correctness of various input data types, such as
+ * usernames, passwords, URLs, email addresses, and more. These utility
+ * functions are useful for ensuring data integrity and security throughout
+ * the application.
+ */
+export declare namespace Validate {
+	/**
+	 * Validates a username based on specific rules.
+	 * A valid username:
+	 * - Should not be one of the restricted names (e.g., "null", "com1", "lpt1", "admin").
+	 * - Should not contain double hyphens "--".
+	 * - Must start with a lowercase letter and can include lowercase letters, numbers, and hyphens.
+	 * - Must be between 4 and 30 characters long.
+	 *
+	 * @param {string} username - The username to validate.
+	 * @returns {boolean} True if the username is valid, otherwise false.
+	 */
+	function username(username: string): boolean;
+	/**
+	 * Validates a password.
+	 * A valid password:
+	 * - Must be exactly 128 characters long.
+	 * - Can include lowercase and uppercase letters and numbers.
+	 *
+	 * @param {string} password - The password to validate.
+	 * @returns {boolean} True if the password is valid, otherwise false.
+	 */
+	function password(password: string): boolean;
+	/**
+	 * Validates a URL.
+	 *
+	 * @param {string} url - The URL to validate.
+	 * @returns {boolean} True if the URL is valid, otherwise false.
+	 */
+	function url(url: string): boolean;
+	/**
+	 * Validates an email address.
+	 *
+	 * @param {string} email - The email address to validate.
+	 * @returns {boolean} True if the email is valid, otherwise false.
+	 */
+	function email(email: string): boolean;
+	/**
+	 * Validates an account type.
+	 * Valid account types are either 0 or 1.
+	 *
+	 * @param {number} type - The account type to validate.
+	 * @returns {boolean} True if the account type is valid, otherwise false.
+	 */
+	function accountType(type: number): boolean;
+	/**
+	 * Validates a One-Time Password (OTP).
+	 * A valid OTP:
+	 * - Must be null, empty, 6 characters long, or 44 characters long.
+	 *
+	 * @param {string | null} otp - The OTP to validate.
+	 * @returns {boolean} True if the OTP is valid, otherwise false.
+	 */
+	function otp(otp: string | null): boolean;
+	/**
+	 * Validates a token.
+	 * A valid token:
+	 * - Must be exactly 128 characters long.
+	 * - Can include lowercase and uppercase letters and numbers.
+	 *
+	 * @param {string} token - The token to validate.
+	 * @returns {boolean} True if the token is valid, otherwise false.
+	 */
+	function token(token: string): boolean;
+	/**
+	 * Validates if a value is a positive integer.
+	 *
+	 * @param {any} number - The value to check.
+	 * @returns {boolean} True if the value is a positive integer, otherwise false.
+	 */
+	function positiveInteger(number: any): boolean;
+	/**
+	 * Validates a YubiKey ID.
+	 * A valid YubiKey ID is 44 characters long.
+	 *
+	 * @param {string} id - The YubiKey ID to validate.
+	 * @returns {boolean} True if the ID is valid, otherwise false.
+	 */
+	function yubiKey(id: string): boolean;
+	/**
+	 * Validates a license key.
+	 * A valid license key is 29 characters long.
+	 *
+	 * @param {string} license - The license key to validate.
+	 * @returns {boolean} True if the license key is valid, otherwise false.
+	 */
+	function license(license: string): boolean;
+	/**
+	 * Checks if a string is a valid JSON string.
+	 *
+	 * @param {string} json - The string to validate as JSON.
+	 * @returns {boolean} True if the string is valid JSON, otherwise false.
+	 */
+	function json(json: string): boolean;
+	/**
+	 * Validates a response object.
+	 * A valid response has an 'error' property of type number and an 'info' property of type string.
+	 *
+	 * @param {any} response - The response object to validate.
+	 * @returns {boolean} True if the response is valid, otherwise false.
+	 */
+	function response(response: any): boolean;
+	/**
+	 * Validates a file path name for a user.
+	 * A valid file path name:
+	 * - Should not include "..".
+	 * - Must match the regex pattern /^[a-zA-Z0-9\/_. -]+$/.
+	 *
+	 * @param {string} filePathName - The file path name to validate.
+	 * @returns {boolean} True if the file path name is valid, otherwise false.
+	 */
+	function userFilePathName(filePathName: string): boolean;
+	/**
+	 * Validates an array of file path names for a user.
+	 * Each valid file path name:
+	 * - Should not include "..".
+	 * - Must match the regex pattern /^[a-zA-Z0-9\/_. -]+$/.
+	 *
+	 * @param {string[]} filePathNames - The array of file path names to validate.
+	 * @returns {boolean} True if all file path names are valid, otherwise false.
+	 */
+	function userFilePathNames(filePathNames: string[]): boolean;
+	/**
+	 * Validates an expiration time.
+	 * The expiration time is valid if it is greater than the current time.
+	 *
+	 * @param {bigint | number} expiration - The expiration time to validate.
+	 * @returns {boolean} True if the expiration time is valid, otherwise false.
+	 */
+	function expiration(expiration: bigint | number): boolean;
+	/**
+	 * Validates a share link.
+	 * A valid share link is exactly 15 alphanumeric characters.
+	 *
+	 * @param {string} id - The share link to validate.
+	 * @returns {boolean} True if the share link is valid, otherwise false.
+	 */
+	function sharelink(id: string): boolean;
+}
+/**
  * Class for interacting with the Cloudky API.
  *
  * This class provides functions for managing accounts, files, and shareable links
  * via HTTP requests to the Cloudky server.
  */
-declare class CloudkyAPI {
+export declare class CloudkyAPI {
 	server: string;
 	username: string;
 	private password;
@@ -466,7 +657,10 @@ declare class CloudkyAPI {
 }
 
 export {
-	CloudkyAPI as default,
+	Argon2id,
+	Blake2b,
+	Error$1 as Error,
+	PasswordEntropy,
 };
 
 export {};

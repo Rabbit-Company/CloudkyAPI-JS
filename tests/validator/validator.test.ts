@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import Validate from "../../src/validate";
+import { Validate } from "../../src/cloudky-api";
 
 describe("validator", () => {
 	test("usernames", async () => {

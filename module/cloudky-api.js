@@ -1,4 +1,39 @@
 // src/errors.ts
+var Error2;
+((Error3) => {
+  Error3[Error3["SUCCESS"] = 0] = "SUCCESS";
+  Error3[Error3["INVALID_ENDPOINT"] = 404] = "INVALID_ENDPOINT";
+  Error3[Error3["BEARER_TOKEN_MISSING"] = 1000] = "BEARER_TOKEN_MISSING";
+  Error3[Error3["REQUIRED_DATA_MISSING"] = 1001] = "REQUIRED_DATA_MISSING";
+  Error3[Error3["REGISTRATION_DISABLED"] = 1002] = "REGISTRATION_DISABLED";
+  Error3[Error3["INVALID_USERNAME_FORMAT"] = 1003] = "INVALID_USERNAME_FORMAT";
+  Error3[Error3["PASSWORD_NOT_HASHED"] = 1004] = "PASSWORD_NOT_HASHED";
+  Error3[Error3["INVALID_FILE_NAME"] = 1005] = "INVALID_FILE_NAME";
+  Error3[Error3["INVALID_FILE"] = 1006] = "INVALID_FILE";
+  Error3[Error3["USERNAME_ALREADY_REGISTERED"] = 1007] = "USERNAME_ALREADY_REGISTERED";
+  Error3[Error3["INVALID_API_SECRET_KEY"] = 1008] = "INVALID_API_SECRET_KEY";
+  Error3[Error3["INVALID_EMAIL"] = 1009] = "INVALID_EMAIL";
+  Error3[Error3["MAX_FILE_SIZE_EXCEEDED"] = 1010] = "MAX_FILE_SIZE_EXCEEDED";
+  Error3[Error3["MISSING_AUTHORIZATION_HEADER"] = 1011] = "MISSING_AUTHORIZATION_HEADER";
+  Error3[Error3["INVALID_USERNAME"] = 1012] = "INVALID_USERNAME";
+  Error3[Error3["INVALID_PASSWORD"] = 1013] = "INVALID_PASSWORD";
+  Error3[Error3["INCORRECT_PASSWORD"] = 1014] = "INCORRECT_PASSWORD";
+  Error3[Error3["REDIS_CONNECTION_ERROR"] = 1015] = "REDIS_CONNECTION_ERROR";
+  Error3[Error3["INVALID_TOKEN"] = 1016] = "INVALID_TOKEN";
+  Error3[Error3["TOKEN_EXPIRED"] = 1017] = "TOKEN_EXPIRED";
+  Error3[Error3["MISSING_USERNAME_AND_TOKEN"] = 1018] = "MISSING_USERNAME_AND_TOKEN";
+  Error3[Error3["INVALID_ACCOUNT_TYPE"] = 1019] = "INVALID_ACCOUNT_TYPE";
+  Error3[Error3["INVALID_UPLOAD_ID"] = 1020] = "INVALID_UPLOAD_ID";
+  Error3[Error3["INVALID_EXPIRATION_TIMESTAMP"] = 1021] = "INVALID_EXPIRATION_TIMESTAMP";
+  Error3[Error3["NON_EXISTENT_SHARE_LINK"] = 1022] = "NON_EXISTENT_SHARE_LINK";
+  Error3[Error3["INVALID_SHARE_LINK"] = 1023] = "INVALID_SHARE_LINK";
+  Error3[Error3["INVALID_OTP"] = 1024] = "INVALID_OTP";
+  Error3[Error3["PASSWORD_TOO_WEAK"] = 1025] = "PASSWORD_TOO_WEAK";
+  Error3[Error3["UNKNOWN_ERROR"] = 2000] = "UNKNOWN_ERROR";
+  Error3[Error3["SERVER_UNREACHABLE"] = 5000] = "SERVER_UNREACHABLE";
+  Error3[Error3["INVALID_RESPONSE_FORMAT"] = 5001] = "INVALID_RESPONSE_FORMAT";
+  Error3[Error3["INSUFFICIENT_PERMISSIONS"] = 9999] = "INSUFFICIENT_PERMISSIONS";
+})(Error2 ||= {});
 var Errors;
 ((Errors) => {
   Errors.list = {
@@ -1393,7 +1428,12 @@ class CloudkyAPI {
     return await CloudkyAPI.shareLinkList(this.server, this.username, this.token);
   }
 }
-var cloudky_api_default = CloudkyAPI;
 export {
-  cloudky_api_default as default
+  validate_default as Validate,
+  password_entropy_default as PasswordEntropy,
+  errors_default as Errors,
+  Error2 as Error,
+  CloudkyAPI,
+  blake2b_default as Blake2b,
+  argon2id_default as Argon2id
 };

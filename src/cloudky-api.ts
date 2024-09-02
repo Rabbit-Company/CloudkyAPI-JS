@@ -1,5 +1,14 @@
 import Errors, { Error } from "./errors";
-import type { StandardResponse, AccountTokenResponse, AccountDataResponse, FileListResponse, ShareLinkListResponse } from "./types";
+import type {
+	StandardResponse,
+	AccountTokenResponse,
+	AccountData,
+	AccountDataResponse,
+	FileInformation,
+	FileListResponse,
+	ShareLink,
+	ShareLinkListResponse,
+} from "./types";
 import Validate from "./validate";
 import Blake2b from "@rabbit-company/blake2b";
 import Argon2id from "@rabbit-company/argon2id";
@@ -745,4 +754,5 @@ class CloudkyAPI {
 	}
 }
 
-export default CloudkyAPI;
+export type { StandardResponse, AccountTokenResponse, AccountData, AccountDataResponse, FileInformation, FileListResponse, ShareLink, ShareLinkListResponse };
+export { CloudkyAPI, Error, Errors, Validate, Blake2b, Argon2id, PasswordEntropy };
