@@ -6,6 +6,10 @@ const email = document.getElementById("email") as HTMLInputElement;
 const password = document.getElementById("password") as HTMLInputElement;
 const responses = document.getElementById("responses");
 
+const filePath = document.getElementById("file-path") as HTMLInputElement;
+const fileDestination = document.getElementById("file-destination") as HTMLInputElement;
+const fileContent = document.getElementById("file-content") as HTMLInputElement;
+
 const sharelinkID = document.getElementById("sharelink-id") as HTMLInputElement;
 const sharelinkPath = document.getElementById("sharelink-path") as HTMLInputElement;
 const sharelinkPassword = document.getElementById("sharelink-password") as HTMLInputElement;
@@ -95,6 +99,57 @@ document.getElementById("btn-sharelink-delete")?.addEventListener("click", async
 document.getElementById("btn-sharelink-create")?.addEventListener("click", async () => {
 	latency = Date.now();
 	const res = await cloudky.createShareLink(sharelinkPath.value, sharelinkPassword.value || null, new Date(sharelinkExpiration.value).getTime() || null);
+	printResponse(res);
+});
+
+document.getElementById("btn-file-upload")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const content = fileContent?.files?.length ? fileContent.files[0] : new Blob();
+	const res = await cloudky.uploadFile(filePath.value, content);
+	printResponse(res);
+});
+
+document.getElementById("btn-file-download")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.downloadFile(filePath.value);
+	if (res instanceof Blob) {
+		const parts = filePath.value.split("/");
+		const fileName = parts[parts.length - 1];
+
+		let url = window.URL.createObjectURL(res);
+		let a = document.createElement("a");
+		a.href = url;
+		a.download = fileName;
+		document.body.appendChild(a);
+		a.click();
+		window.URL.revokeObjectURL(url);
+		document.body.removeChild(a);
+	} else {
+		printResponse(res);
+	}
+});
+
+document.getElementById("btn-file-list")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.listFiles();
+	printResponse(res);
+});
+
+document.getElementById("btn-file-move")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.moveFiles([filePath.value], fileDestination.value);
+	printResponse(res);
+});
+
+document.getElementById("btn-file-rename")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.renameFile(filePath.value, fileDestination.value);
+	printResponse(res);
+});
+
+document.getElementById("btn-file-delete")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.deleteFiles([filePath.value]);
 	printResponse(res);
 });
 

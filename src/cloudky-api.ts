@@ -569,7 +569,8 @@ class CloudkyAPI {
 
 		try {
 			const formData = new FormData();
-			formData.append("file", fileContent, destination);
+			formData.append("name", destination);
+			formData.append("file", fileContent);
 
 			const result = await fetch(server + "/v1/file/upload", {
 				method: "PUT",

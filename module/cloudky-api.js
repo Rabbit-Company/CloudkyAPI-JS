@@ -1305,7 +1305,8 @@ class CloudkyAPI {
       return errors_default.getJson(1010 /* MAX_FILE_SIZE_EXCEEDED */);
     try {
       const formData = new FormData;
-      formData.append("file", fileContent, destination);
+      formData.append("name", destination);
+      formData.append("file", fileContent);
       const result = await fetch(server + "/v1/file/upload", {
         method: "PUT",
         headers: {
