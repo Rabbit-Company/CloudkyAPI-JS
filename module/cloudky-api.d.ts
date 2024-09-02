@@ -503,13 +503,13 @@ export declare class CloudkyAPI {
 	 * @param {string} token - The token for authenticating the request.
 	 * @returns {Promise<FileListResponse>} A promise that resolves to the file list response object, which includes the list of files or an error message.
 	 */
-	static getFileList(server: string, username: string, token: string): Promise<FileListResponse>;
+	static listFiles(server: string, username: string, token: string): Promise<FileListResponse>;
 	/**
 	 * Retrieves a list of files from the server.
 	 *
 	 * @returns {Promise<FileListResponse>} A promise that resolves to the file list response object, which includes the list of files or an error message.
 	 */
-	getFileList(): Promise<FileListResponse>;
+	listFiles(): Promise<FileListResponse>;
 	/**
 	 * Deletes specified files from the server.
 	 *
@@ -612,7 +612,7 @@ export declare class CloudkyAPI {
 	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
 	 */
-	static shareLinkCreate(server: string, username: string, token: string, path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse>;
+	static createShareLink(server: string, username: string, token: string, path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse>;
 	/**
 	 * Creates a shareable link for a file or folder.
 	 *
@@ -621,7 +621,7 @@ export declare class CloudkyAPI {
 	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
 	 */
-	shareLinkCreate(path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse>;
+	createShareLink(path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse>;
 	/**
 	 * Deletes a shareable link.
 	 *
@@ -631,14 +631,14 @@ export declare class CloudkyAPI {
 	 * @param {string} link - The share link to be deleted.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link deletion operation.
 	 */
-	static shareLinkDelete(server: string, username: string, token: string, link: string): Promise<StandardResponse>;
+	static deleteShareLink(server: string, username: string, token: string, link: string): Promise<StandardResponse>;
 	/**
 	 * Deletes a shareable link.
 	 *
 	 * @param {string} link - The share link to be deleted.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link deletion operation.
 	 */
-	shareLinkDelete(link: string): Promise<StandardResponse>;
+	deleteShareLink(link: string): Promise<StandardResponse>;
 	/**
 	 * Retrieves a list of shareable links created by the account.
 	 *
@@ -647,13 +647,13 @@ export declare class CloudkyAPI {
 	 * @param {string} token - The token for authenticating the request.
 	 * @returns {Promise<ShareLinkListResponse>} A promise that resolves to the share link list response object, which includes a list of shareable links or an error message.
 	 */
-	static shareLinkList(server: string, username: string, token: string): Promise<ShareLinkListResponse>;
+	static listShareLinks(server: string, username: string, token: string): Promise<ShareLinkListResponse>;
 	/**
 	 * Retrieves a list of shareable links created by the account.
 	 *
 	 * @returns {Promise<ShareLinkListResponse>} A promise that resolves to the share link list response object, which includes a list of shareable links or an error message.
 	 */
-	shareLinkList(): Promise<ShareLinkListResponse>;
+	listShareLinks(): Promise<ShareLinkListResponse>;
 }
 
 export {

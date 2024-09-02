@@ -7,6 +7,8 @@ const password = document.getElementById("password") as HTMLInputElement;
 const responses = document.getElementById("responses");
 
 const sharelinkID = document.getElementById("sharelink-id") as HTMLInputElement;
+const sharelinkPath = document.getElementById("sharelink-path") as HTMLInputElement;
+const sharelinkPassword = document.getElementById("sharelink-password") as HTMLInputElement;
 const sharelinkExpiration = document.getElementById("sharelink-expiration") as HTMLInputElement;
 
 const loginPage = document.getElementById("login-page");
@@ -87,6 +89,12 @@ document.getElementById("btn-sharelink-list")?.addEventListener("click", async (
 document.getElementById("btn-sharelink-delete")?.addEventListener("click", async () => {
 	latency = Date.now();
 	const res = await cloudky.deleteShareLink(sharelinkID.value);
+	printResponse(res);
+});
+
+document.getElementById("btn-sharelink-create")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.createShareLink(sharelinkPath.value, sharelinkPassword.value || null, new Date(sharelinkExpiration.value).getTime() || null);
 	printResponse(res);
 });
 

@@ -1118,7 +1118,7 @@ class CloudkyAPI {
   async deleteAccount() {
     return await CloudkyAPI.deleteAccount(this.server, this.username, this.token);
   }
-  static async getFileList(server, username, token) {
+  static async listFiles(server, username, token) {
     if (!validate_default.url(server))
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(username))
@@ -1142,8 +1142,8 @@ class CloudkyAPI {
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     }
   }
-  async getFileList() {
-    return await CloudkyAPI.getFileList(this.server, this.username, this.token);
+  async listFiles() {
+    return await CloudkyAPI.listFiles(this.server, this.username, this.token);
   }
   static async deleteFiles(server, username, token, paths) {
     if (!validate_default.url(server))
@@ -1326,7 +1326,7 @@ class CloudkyAPI {
   async uploadFile(destination, fileContent) {
     return await CloudkyAPI.uploadFile(this.server, this.username, this.token, destination, fileContent);
   }
-  static async shareLinkCreate(server, username, token, path, password, expiration) {
+  static async createShareLink(server, username, token, path, password, expiration) {
     if (!validate_default.url(server))
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(username))
@@ -1363,10 +1363,10 @@ class CloudkyAPI {
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     }
   }
-  async shareLinkCreate(path, password, expiration) {
-    return await CloudkyAPI.shareLinkCreate(this.server, this.username, this.token, path, password, expiration);
+  async createShareLink(path, password, expiration) {
+    return await CloudkyAPI.createShareLink(this.server, this.username, this.token, path, password, expiration);
   }
-  static async shareLinkDelete(server, username, token, link) {
+  static async deleteShareLink(server, username, token, link) {
     if (!validate_default.url(server))
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(username))
@@ -1397,10 +1397,10 @@ class CloudkyAPI {
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     }
   }
-  async shareLinkDelete(link) {
-    return await CloudkyAPI.shareLinkDelete(this.server, this.username, this.token, link);
+  async deleteShareLink(link) {
+    return await CloudkyAPI.deleteShareLink(this.server, this.username, this.token, link);
   }
-  static async shareLinkList(server, username, token) {
+  static async listShareLinks(server, username, token) {
     if (!validate_default.url(server))
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(username))
@@ -1424,8 +1424,8 @@ class CloudkyAPI {
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     }
   }
-  async shareLinkList() {
-    return await CloudkyAPI.shareLinkList(this.server, this.username, this.token);
+  async listShareLinks() {
+    return await CloudkyAPI.listShareLinks(this.server, this.username, this.token);
   }
 }
 export {
