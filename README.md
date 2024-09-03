@@ -88,6 +88,90 @@ if (res.error === Error.SUCCESS) {
 }
 ```
 
+### Getting List of Files
+
+To list all files, use the listFiles method.
+
+```js
+const res = await cloudky.listFiles();
+
+if (res.data) {
+	console.log("File list: " + res.data);
+} else {
+	console.error("Failed to list files: " + res.message);
+}
+```
+
+### Uploading a File
+
+To upload a file, use the uploadFile method.
+
+```js
+const res = await cloudky.uploadFile("Documents/hello.txt", new Blob(["Hello World!"], { type: "text/plain" }));
+
+if (res.error === Error.SUCCESS) {
+	console.log("File uploaded successfully!");
+} else {
+	console.error("Failed to upload file: " + res.message);
+}
+```
+
+### Downloading a File
+
+To download a file, use the downloadFile method.
+
+```js
+const res = await cloudky.downloadFile("Documents/hello.txt");
+
+if (res instanceof Blob) {
+	console.log("File downloaded successfully!");
+} else {
+	console.error("Failed to download a file: " + res.message);
+}
+```
+
+### Moving Files
+
+To move files, use the moveFiles method.
+
+```js
+const res = await cloudky.moveFiles(["Documents/hello.txt"], "Documents/Test");
+
+if (res.error === Error.SUCCESS) {
+	console.log("Files moved successfully!");
+} else {
+	console.error("Failed to move files: " + res.message);
+}
+```
+
+### Renaming File
+
+To rename a files, use the renameFile method.
+
+```js
+const res = await cloudky.renameFile("Documents/Test/hello.txt", "Documents/Test/helloWorld.txt");
+
+if (res.error === Error.SUCCESS) {
+	console.log("File renamed successfully!");
+} else {
+	console.error("Failed to rename a file: " + res.message);
+}
+```
+
+### Deleting Files
+
+To delete files, use the deleteFiles method.
+
+```js
+const res = await cloudky.deleteFiles(["Documents/Test/helloWorld.txt"]);
+
+if (res.error === Error.SUCCESS) {
+	console.log("Files deleted successfully!");
+} else {
+	console.error("Failed to delete files: " + res.message);
+}
+```
+
 ## Types
 
 The library provides several TypeScript types that are useful for type checking and code clarity:
