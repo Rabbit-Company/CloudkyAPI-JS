@@ -24,38 +24,15 @@ import type { AccountDataResponse, AccountTokenResponse } from "@rabbit-company/
 
 ## Usage
 
-### Creating an Instance
-
-To use the CloudkyAPI, you first need to create an instance of the CloudkyAPI class with your server URL, username, password, and an optional OTP (One-Time Password).
+### Creating New Account
 
 ```js
-const cloudky = new CloudkyAPI("https://your-cloudky-server.com", "yourUsername", "yourPassword", "yourOTP");
-```
+const response = await CloudkyAPI.createAccount("https://your-cloudky-server.com", "yourUsername", "yourEmail", "yourPassword", 0);
 
-### Validating Input
-
-You can validate the input data using the built-in validate method. This method checks if the server URL, username, password, and OTP are formatted correctly.
-
-```js
-const validationResponse = cloudky.validate();
-
-if (validationResponse.error) {
-	console.error("Validation Error:", validationResponse.message);
+if (response.error === Error.SUCCESS) {
+	console.log("Account creation successful");
 } else {
-	console.log("Validation Successful");
-}
-```
-
-### Generating Authentication Hash
-
-Before making authenticated requests, you need to generate an authentication hash from your username and password.
-
-```js
-const isInitialized = await cloudky.initialize();
-if (isInitialized) {
-	console.log("Authentication hash generated successfully.");
-} else {
-	console.error("Failed to generate authentication hash.");
+	console.error("Error: " + response.message);
 }
 ```
 
@@ -64,26 +41,34 @@ if (isInitialized) {
 To authenticate with the Cloudky server, you can retrieve an account token using the getToken method.
 
 ```js
-const tokenResponse = await cloudky.getToken();
+const response = await CloudkyAPI.getToken("https://your-cloudky-server.com", "yourUsername", "yourPassword", "yourOTP");
 
-if (tokenResponse.token) {
-	console.log("Token retrieved successfully:", tokenResponse.token);
+if (response.token) {
+	console.log("Your Authentication Token: " + response.token);
 } else {
-	console.error("Failed to retrieve token:", tokenResponse.message);
+	console.error("Error: " + response.message);
 }
+```
+
+### Creating an Instance
+
+To use the CloudkyAPI, you first need to create an instance of the CloudkyAPI class with your server URL, username and token.
+
+```js
+const cloudky = new CloudkyAPI("https://your-cloudky-server.com", "yourUsername", "yourToken");
 ```
 
 ### Retrieving Account Data
 
-Once you have a valid token, you can retrieve account data using the getAccountData method.
+Once you have a valid instance of the CloudkyAPI, you can retrieve account data using the getAccountData method.
 
 ```js
 const accountData = await cloudky.getAccountData();
 
-if (accountData.error) {
-	console.error("Failed to retrieve account data: " + accountData.message);
-} else {
+if (accountData.error === Error.SUCCESS) {
 	console.log("Account Data:", accountData.data);
+} else {
+	console.error("Failed to retrieve account data: " + accountData.message);
 }
 ```
 
@@ -92,12 +77,12 @@ if (accountData.error) {
 To delete an account from the Cloudky server, use the deleteAccount method.
 
 ```js
-const deleteResponse = await cloudky.deleteAccount();
+const res = await cloudky.deleteAccount();
 
-if (deleteResponse.error) {
-	console.error("Failed to delete account:", deleteResponse.message);
-} else {
+if (res.error === Error.SUCCESS) {
 	console.log("Account deleted successfully.");
+} else {
+	console.error("Failed to delete account: " + res.message);
 }
 ```
 
@@ -122,9 +107,9 @@ Example of handling an error:
 ```js
 import { Error } from "@rabbit-company/cloudky-api";
 
-const response = cloudky.validate();
-if (response.error === Error.INVALID_USERNAME_FORMAT) {
-	console.error("The username format is invalid.");
+const res = cloudky.getAccountData();
+if (res.error === Error.TOKEN_EXPIRED) {
+	console.error("Token has expired.");
 }
 ```
 
