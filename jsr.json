@@ -3,6 +3,6 @@
 	"version": "0.0.1",
 	"exports": "./src/cloudky-api.ts",
 	"publish": {
-		"include": ["LICENSE", "README.md", "src/cloudky-api.ts"]
+		"include": ["LICENSE", "README.md", "src/cloudky-api.ts", "src/errors.ts", "src/types.ts", "src/validate.ts"]
 	}
 }

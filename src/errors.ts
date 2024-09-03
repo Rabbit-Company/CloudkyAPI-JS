@@ -1,3 +1,5 @@
+import type { StandardResponse } from "./types";
+
 /**
  * Enum representing various error codes used throughout the application.
  * Each error code corresponds to a specific error message.
@@ -120,16 +122,16 @@ namespace Errors {
 	 * @param {Error} id - The error code to retrieve details for.
 	 * @returns {{ message: string; httpCode: number }} An object containing the error message and HTTP status code.
 	 */
-	export function get(id: Error) {
+	export function get(id: Error): { message: string; httpCode: number } {
 		return list[id];
 	}
 
 	/**
 	 * Formats the error response as a JSON object.
 	 * @param {Error} id - The error code to format.
-	 * @returns {{ error: Error, info: string }} A JSON object containing the error code and message.
+	 * @returns {StandardResponse} A JSON object containing the error code and message.
 	 */
-	export function getJson(id: Error) {
+	export function getJson(id: Error): StandardResponse {
 		return { error: id, info: list[id].message };
 	}
 }
