@@ -26,6 +26,8 @@ import type { AccountDataResponse, AccountTokenResponse } from "@rabbit-company/
 
 ### Creating New Account
 
+To create a new account using the CloudkyAPI, use the createAccount function as shown below:
+
 ```js
 const response = await CloudkyAPI.createAccount("https://your-cloudky-server.com", "yourUsername", "yourEmail", "yourPassword", 0);
 
