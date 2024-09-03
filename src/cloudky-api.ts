@@ -629,6 +629,54 @@ class CloudkyAPI {
 	}
 
 	/**
+	 * Downloads a file from the share link.
+	 *
+	 * @param {string} server - The URL of the server from which to download the file.
+	 * @param {string} link - The share link for file to be downloaded from.
+	 * @param {string | null} password - Optional password for accessing the share link.
+	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
+	 */
+	static async downloadFromShareLink(server: string, link: string, password: string | null): Promise<Blob | StandardResponse> {
+		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
+		if (!Validate.sharelink(link)) return Errors.getJson(Error.INVALID_SHARE_LINK);
+		if (password !== null && !Validate.password(password)) return Errors.getJson(Error.INVALID_PASSWORD);
+
+		try {
+			const data = {
+				link: link,
+				password: password,
+			};
+
+			const result = await fetch(server + "/v1/sharelink/download", {
+				method: "POST",
+				body: JSON.stringify(data),
+			});
+
+			if (result.status !== 200) {
+				const response: StandardResponse = await result.json();
+				if (Validate.response(response)) return response;
+				return Errors.getJson(Error.UNKNOWN_ERROR);
+			}
+
+			return await result.blob();
+		} catch (err) {
+			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
+			return Errors.getJson(Error.SERVER_UNREACHABLE);
+		}
+	}
+
+	/**
+	 * Downloads a file from the share link.
+	 *
+	 * @param {string} link - The share link for file to be downloaded from.
+	 * @param {string | null} password - Optional password for accessing the share link.
+	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
+	 */
+	async downloadFromShareLink(link: string, password: string | null): Promise<Blob | StandardResponse> {
+		return await CloudkyAPI.downloadFromShareLink(this.server, link, password);
+	}
+
+	/**
 	 * Deletes a shareable link.
 	 *
 	 * @param {string} server - The URL of the server where the share link will be deleted.

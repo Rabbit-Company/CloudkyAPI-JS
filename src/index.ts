@@ -77,6 +77,26 @@ document.getElementById("btn-sharelink-delete")?.addEventListener("click", async
 	printResponse(res);
 });
 
+document.getElementById("btn-sharelink-download")?.addEventListener("click", async () => {
+	latency = Date.now();
+	const res = await cloudky.downloadFromShareLink(sharelinkID.value, sharelinkPassword.value || null);
+	if (res instanceof Blob) {
+		const parts = filePath.value.split("/");
+		const fileName = parts[parts.length - 1];
+
+		let url = window.URL.createObjectURL(res);
+		let a = document.createElement("a");
+		a.href = url;
+		a.download = fileName;
+		document.body.appendChild(a);
+		a.click();
+		window.URL.revokeObjectURL(url);
+		document.body.removeChild(a);
+	} else {
+		printResponse(res);
+	}
+});
+
 document.getElementById("btn-sharelink-create")?.addEventListener("click", async () => {
 	latency = Date.now();
 	const res = await cloudky.createShareLink(sharelinkPath.value, sharelinkPassword.value || null, new Date(sharelinkExpiration.value).getTime() || null);

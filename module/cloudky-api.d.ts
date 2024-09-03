@@ -604,6 +604,23 @@ export declare class CloudkyAPI {
 	 */
 	createShareLink(path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse>;
 	/**
+	 * Downloads a file from the share link.
+	 *
+	 * @param {string} server - The URL of the server from which to download the file.
+	 * @param {string} link - The share link for file to be downloaded from.
+	 * @param {string | null} password - Optional password for accessing the share link.
+	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
+	 */
+	static downloadFromShareLink(server: string, link: string, password: string | null): Promise<Blob | StandardResponse>;
+	/**
+	 * Downloads a file from the share link.
+	 *
+	 * @param {string} link - The share link for file to be downloaded from.
+	 * @param {string | null} password - Optional password for accessing the share link.
+	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
+	 */
+	downloadFromShareLink(link: string, password: string | null): Promise<Blob | StandardResponse>;
+	/**
 	 * Deletes a shareable link.
 	 *
 	 * @param {string} server - The URL of the server where the share link will be deleted.

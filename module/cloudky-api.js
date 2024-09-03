@@ -1343,6 +1343,38 @@ class CloudkyAPI {
   async createShareLink(path, password, expiration) {
     return await CloudkyAPI.createShareLink(this.server, this.username, this.token, path, password, expiration);
   }
+  static async downloadFromShareLink(server, link, password) {
+    if (!validate_default.url(server))
+      return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
+    if (!validate_default.sharelink(link))
+      return errors_default.getJson(1023 /* INVALID_SHARE_LINK */);
+    if (password !== null && !validate_default.password(password))
+      return errors_default.getJson(1013 /* INVALID_PASSWORD */);
+    try {
+      const data = {
+        link,
+        password
+      };
+      const result = await fetch(server + "/v1/sharelink/download", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+      if (result.status !== 200) {
+        const response = await result.json();
+        if (validate_default.response(response))
+          return response;
+        return errors_default.getJson(2000 /* UNKNOWN_ERROR */);
+      }
+      return await result.blob();
+    } catch (err) {
+      if (err instanceof SyntaxError)
+        return errors_default.getJson(5001 /* INVALID_RESPONSE_FORMAT */);
+      return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
+    }
+  }
+  async downloadFromShareLink(link, password) {
+    return await CloudkyAPI.downloadFromShareLink(this.server, link, password);
+  }
   static async deleteShareLink(server, username, token, link) {
     if (!validate_default.url(server))
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
