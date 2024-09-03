@@ -181,10 +181,24 @@ Set the password or expiration to null if you do not want to protect your share 
 ```js
 const res = await cloudky.createShareLink("Documents/Test/helloWorld.txt", "PasswordForShareLink", 1918296000000);
 
-if (res.error === Error.SUCCESS) {
-	console.log("Share Link successfully created!");
+if (res.link) {
+	console.log("Share Link successfully created: " + res.link);
 } else {
 	console.error("Failed to create share link: " + res.message);
+}
+```
+
+### Getting List of Share Links
+
+To list all share links, use the listShareLinks method.
+
+```js
+const res = await cloudky.listShareLinks();
+
+if (res.links) {
+	console.log("Share Links: " + res.links);
+} else {
+	console.error("Failed to list share links: " + res.message);
 }
 ```
 
