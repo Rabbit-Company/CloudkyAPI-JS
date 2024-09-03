@@ -30,17 +30,7 @@ document.getElementById("btn-create-account")?.addEventListener("click", async (
 	if (!server || !username || !email || !password) return;
 
 	latency = Date.now();
-
-	const resValidate = CloudkyAPI.validate(server.value, username.value, password.value, "");
-	if (resValidate.error !== Error.SUCCESS) {
-		printResponse(resValidate);
-		return;
-	}
-
-	const authHash = await CloudkyAPI.generateAuthenticationHash(username.value, password.value);
-	if (!authHash) return;
-
-	const res = await CloudkyAPI.createAccount(server.value, username.value, email.value, authHash, 0);
+	const res = await CloudkyAPI.createAccount(server.value, username.value, email.value, password.value, 0);
 	printResponse(res);
 });
 
@@ -48,20 +38,11 @@ document.getElementById("btn-get-token")?.addEventListener("click", async () => 
 	if (!server || !username || !password) return;
 
 	latency = Date.now();
-	cloudky = new CloudkyAPI(server.value, username.value, password.value, "");
-
-	const resValidate = cloudky.validate();
-	if (resValidate.error !== Error.SUCCESS) {
-		printResponse(resValidate);
-		return;
-	}
-
-	if (!(await cloudky.initialize())) return;
-
-	const res = await cloudky.getToken();
+	const res = await CloudkyAPI.getToken(server.value, username.value, password.value, "");
 	printResponse(res);
 
 	if (res.token) {
+		cloudky = new CloudkyAPI(server.value, username.value, res.token);
 		if (loginPage) loginPage.style.display = "none";
 		if (loggedInPage) loggedInPage.style.display = "block";
 	}

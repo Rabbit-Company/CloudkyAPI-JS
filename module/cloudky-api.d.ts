@@ -382,9 +382,6 @@ export declare namespace Validate {
 export declare class CloudkyAPI {
 	server: string;
 	username: string;
-	private password;
-	private otp;
-	private authHash;
 	token: string;
 	/**
 	 * Creates an instance of CloudkyAPI.
@@ -392,10 +389,9 @@ export declare class CloudkyAPI {
 	 * @constructor
 	 * @param {string} server - The URL of the server to connect to.
 	 * @param {string} username - The username for authentication.
-	 * @param {string} password - The password for authentication.
-	 * @param {string|null} otp - The one-time password (OTP) for two-factor authentication.
+	 * @param {string} token - The token for authenticating the request.
 	 */
-	constructor(server: string, username: string, password: string, otp: string);
+	constructor(server: string, username: string, token: string);
 	/**
 	 * Validates the provided parameters for interacting with the Cloudky API.
 	 *
@@ -413,20 +409,12 @@ export declare class CloudkyAPI {
 	/**
 	 * Validates the current instance's properties for interacting with the Cloudky API.
 	 *
-	 * This method checks the validity of the server URL, username, OTP, and depending on the state,
-	 * either the token, authHash, or password. It returns an appropriate error response if any of the validations fail.
+	 * This method checks the validity of the server URL, username and token.
+	 * It returns an appropriate error response if any of the validations fail.
 	 *
 	 * @returns {StandardResponse} The validation response indicating success or error.
 	 */
 	validate(): StandardResponse;
-	/**
-	 * Initializes the CloudkyAPI instance by generating the authentication hash.
-	 * This method sets the `authHash` property based on the provided username and password,
-	 * and clears the password from memory if the hash is successfully generated.
-	 *
-	 * @returns {Promise<boolean>} A promise that resolves to `true` if the `authHash` is successfully generated, otherwise `false`.
-	 */
-	initialize(): Promise<boolean>;
 	/**
 	 * Generates a hashed authentication string using the provided username and password.
 	 * This method uses Blake2b to create a unique hash and Argon2id for further hashing
@@ -443,7 +431,7 @@ export declare class CloudkyAPI {
 	 * @param {string} server - The URL of the server where the account will be created.
 	 * @param {string} username - The username for the new account.
 	 * @param {string} email - The email address for the new account.
-	 * @param {string} password - The hashed password for the new account.
+	 * @param {string} password - The strong password for the new account.
 	 * @param {number} type - The account type (0 for standard, 1 for file E2EE).
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object.
 	 */
@@ -453,18 +441,11 @@ export declare class CloudkyAPI {
 	 *
 	 * @param {string} server - The URL of the server to authenticate against.
 	 * @param {string} username - The username of the account.
-	 * @param {string} password - The hashed password of the account.
+	 * @param {string} password - The strong password of the account.
 	 * @param {string} otp - An optional one-time password (OTP) for two-factor authentication.
 	 * @returns {Promise<AccountTokenResponse>} A promise that resolves to the account token response object.
 	 */
 	static getToken(server: string, username: string, password: string, otp: string): Promise<AccountTokenResponse>;
-	/**
-	 * Retrieves a token for the current account instance using stored credentials and optional OTP.
-	 * Clears authHash from memory once the token is successfully retrieved.
-	 *
-	 * @returns {Promise<AccountTokenResponse>} A promise that resolves to the account token response object.
-	 */
-	getToken(): Promise<AccountTokenResponse>;
 	/**
 	 * Retrieves account data for the specified username and token.
 	 *

@@ -934,15 +934,11 @@ var password_entropy_default = PasswordEntropy;
 class CloudkyAPI {
   server;
   username;
-  password;
-  otp;
-  authHash = "";
-  token = "";
-  constructor(server, username, password, otp) {
+  token;
+  constructor(server, username, token) {
     this.server = server;
     this.username = username;
-    this.password = password;
-    this.otp = otp;
+    this.token = token;
   }
   static validate(server, username, password, otp) {
     if (!validate_default.url(server))
@@ -960,27 +956,9 @@ class CloudkyAPI {
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(this.username))
       return errors_default.getJson(1003 /* INVALID_USERNAME_FORMAT */);
-    if (!validate_default.otp(this.otp))
-      return errors_default.getJson(1024 /* INVALID_OTP */);
-    if (this.token.length) {
-      if (!validate_default.token(this.token))
-        return errors_default.getJson(1016 /* INVALID_TOKEN */);
-    } else if (this.authHash.length) {
-      if (!validate_default.password(this.authHash))
-        return errors_default.getJson(1004 /* PASSWORD_NOT_HASHED */);
-    } else if (this.password.length) {
-      if (password_entropy_default.calculate(this.password) < 75)
-        return errors_default.getJson(1013 /* INVALID_PASSWORD */);
-    }
+    if (!validate_default.token(this.token))
+      return errors_default.getJson(1016 /* INVALID_TOKEN */);
     return errors_default.getJson(0 /* SUCCESS */);
-  }
-  async initialize() {
-    this.authHash = await CloudkyAPI.generateAuthenticationHash(this.username, this.password) || "";
-    if (this.authHash.length) {
-      this.password = "";
-      return true;
-    }
-    return false;
   }
   static async generateAuthenticationHash(username, password) {
     const authHash = blake2b_default.hash(`cloudky2024-${password}-${username}`);
@@ -998,15 +976,18 @@ class CloudkyAPI {
       return errors_default.getJson(1003 /* INVALID_USERNAME_FORMAT */);
     if (!validate_default.email(email))
       return errors_default.getJson(1009 /* INVALID_EMAIL */);
-    if (!validate_default.password(password))
-      return errors_default.getJson(1004 /* PASSWORD_NOT_HASHED */);
+    if (password_entropy_default.calculate(password) < 75)
+      return errors_default.getJson(1025 /* PASSWORD_TOO_WEAK */);
     if (!validate_default.accountType(type))
       return errors_default.getJson(1019 /* INVALID_ACCOUNT_TYPE */);
+    const authHash = await CloudkyAPI.generateAuthenticationHash(username, password);
+    if (!authHash)
+      return errors_default.getJson(2000 /* UNKNOWN_ERROR */);
     try {
       const data = {
         username,
         email,
-        password,
+        password: authHash,
         type
       };
       const result = await fetch(server + "/v1/account/create", {
@@ -1029,10 +1010,13 @@ class CloudkyAPI {
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(username))
       return errors_default.getJson(1003 /* INVALID_USERNAME_FORMAT */);
-    if (!validate_default.password(password))
-      return errors_default.getJson(1004 /* PASSWORD_NOT_HASHED */);
+    if (password_entropy_default.calculate(password) < 75)
+      return errors_default.getJson(1025 /* PASSWORD_TOO_WEAK */);
     if (!validate_default.otp(otp))
       return errors_default.getJson(1024 /* INVALID_OTP */);
+    const authHash = await CloudkyAPI.generateAuthenticationHash(username, password);
+    if (!authHash)
+      return errors_default.getJson(2000 /* UNKNOWN_ERROR */);
     try {
       const data = {
         otp
@@ -1041,7 +1025,7 @@ class CloudkyAPI {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${btoa(username + ":" + password)}`
+          Authorization: `Basic ${btoa(username + ":" + authHash)}`
         },
         body: JSON.stringify(data)
       });
@@ -1054,14 +1038,6 @@ class CloudkyAPI {
         return errors_default.getJson(5001 /* INVALID_RESPONSE_FORMAT */);
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     }
-  }
-  async getToken() {
-    const res = await CloudkyAPI.getToken(this.server, this.username, this.authHash, this.otp);
-    if (res.token) {
-      this.token = res.token;
-      this.authHash = "";
-    }
-    return res;
   }
   static async getAccountData(server, username, token) {
     if (!validate_default.url(server))
@@ -1336,10 +1312,10 @@ class CloudkyAPI {
       return errors_default.getJson(1016 /* INVALID_TOKEN */);
     if (!validate_default.userFilePathName(path))
       return errors_default.getJson(1005 /* INVALID_FILE_NAME */);
-    if (password !== null && !validate_default.password(password))
-      return errors_default.getJson(1004 /* PASSWORD_NOT_HASHED */);
     if (expiration !== null && !validate_default.expiration(expiration))
       return errors_default.getJson(1021 /* INVALID_EXPIRATION_TIMESTAMP */);
+    if (password)
+      password = blake2b_default.hash(`cloudky2024-${password}-${username}`);
     try {
       const data = {
         path,

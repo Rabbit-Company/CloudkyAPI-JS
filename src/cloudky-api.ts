@@ -23,10 +23,7 @@ import PasswordEntropy from "@rabbit-company/password-entropy";
 class CloudkyAPI {
 	server: string;
 	username: string;
-	private password: string;
-	private otp: string;
-	private authHash: string = "";
-	token: string = "";
+	token: string;
 
 	/**
 	 * Creates an instance of CloudkyAPI.
@@ -34,14 +31,12 @@ class CloudkyAPI {
 	 * @constructor
 	 * @param {string} server - The URL of the server to connect to.
 	 * @param {string} username - The username for authentication.
-	 * @param {string} password - The password for authentication.
-	 * @param {string|null} otp - The one-time password (OTP) for two-factor authentication.
+	 * @param {string} token - The token for authenticating the request.
 	 */
-	constructor(server: string, username: string, password: string, otp: string) {
+	constructor(server: string, username: string, token: string) {
 		this.server = server;
 		this.username = username;
-		this.password = password;
-		this.otp = otp;
+		this.token = token;
 	}
 
 	/**
@@ -69,41 +64,17 @@ class CloudkyAPI {
 	/**
 	 * Validates the current instance's properties for interacting with the Cloudky API.
 	 *
-	 * This method checks the validity of the server URL, username, OTP, and depending on the state,
-	 * either the token, authHash, or password. It returns an appropriate error response if any of the validations fail.
+	 * This method checks the validity of the server URL, username and token.
+	 * It returns an appropriate error response if any of the validations fail.
 	 *
 	 * @returns {StandardResponse} The validation response indicating success or error.
 	 */
 	validate(): StandardResponse {
 		if (!Validate.url(this.server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(this.username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
-		if (!Validate.otp(this.otp)) return Errors.getJson(Error.INVALID_OTP);
-
-		if (this.token.length) {
-			if (!Validate.token(this.token)) return Errors.getJson(Error.INVALID_TOKEN);
-		} else if (this.authHash.length) {
-			if (!Validate.password(this.authHash)) return Errors.getJson(Error.PASSWORD_NOT_HASHED);
-		} else if (this.password.length) {
-			if (PasswordEntropy.calculate(this.password) < 75) return Errors.getJson(Error.INVALID_PASSWORD);
-		}
+		if (!Validate.token(this.token)) return Errors.getJson(Error.INVALID_TOKEN);
 
 		return Errors.getJson(Error.SUCCESS);
-	}
-
-	/**
-	 * Initializes the CloudkyAPI instance by generating the authentication hash.
-	 * This method sets the `authHash` property based on the provided username and password,
-	 * and clears the password from memory if the hash is successfully generated.
-	 *
-	 * @returns {Promise<boolean>} A promise that resolves to `true` if the `authHash` is successfully generated, otherwise `false`.
-	 */
-	async initialize(): Promise<boolean> {
-		this.authHash = (await CloudkyAPI.generateAuthenticationHash(this.username, this.password)) || "";
-		if (this.authHash.length) {
-			this.password = "";
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -132,7 +103,7 @@ class CloudkyAPI {
 	 * @param {string} server - The URL of the server where the account will be created.
 	 * @param {string} username - The username for the new account.
 	 * @param {string} email - The email address for the new account.
-	 * @param {string} password - The hashed password for the new account.
+	 * @param {string} password - The strong password for the new account.
 	 * @param {number} type - The account type (0 for standard, 1 for file E2EE).
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object.
 	 */
@@ -140,14 +111,17 @@ class CloudkyAPI {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.email(email)) return Errors.getJson(Error.INVALID_EMAIL);
-		if (!Validate.password(password)) return Errors.getJson(Error.PASSWORD_NOT_HASHED);
+		if (PasswordEntropy.calculate(password) < 75) return Errors.getJson(Error.PASSWORD_TOO_WEAK);
 		if (!Validate.accountType(type)) return Errors.getJson(Error.INVALID_ACCOUNT_TYPE);
+
+		const authHash = await CloudkyAPI.generateAuthenticationHash(username, password);
+		if (!authHash) return Errors.getJson(Error.UNKNOWN_ERROR);
 
 		try {
 			const data = {
 				username: username,
 				email: email,
-				password: password,
+				password: authHash,
 				type: type,
 			};
 
@@ -172,15 +146,18 @@ class CloudkyAPI {
 	 *
 	 * @param {string} server - The URL of the server to authenticate against.
 	 * @param {string} username - The username of the account.
-	 * @param {string} password - The hashed password of the account.
+	 * @param {string} password - The strong password of the account.
 	 * @param {string} otp - An optional one-time password (OTP) for two-factor authentication.
 	 * @returns {Promise<AccountTokenResponse>} A promise that resolves to the account token response object.
 	 */
 	static async getToken(server: string, username: string, password: string, otp: string): Promise<AccountTokenResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
-		if (!Validate.password(password)) return Errors.getJson(Error.PASSWORD_NOT_HASHED);
+		if (PasswordEntropy.calculate(password) < 75) return Errors.getJson(Error.PASSWORD_TOO_WEAK);
 		if (!Validate.otp(otp)) return Errors.getJson(Error.INVALID_OTP);
+
+		const authHash = await CloudkyAPI.generateAuthenticationHash(username, password);
+		if (!authHash) return Errors.getJson(Error.UNKNOWN_ERROR);
 
 		try {
 			const data = {
@@ -191,7 +168,7 @@ class CloudkyAPI {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Basic ${btoa(username + ":" + password)}`,
+					Authorization: `Basic ${btoa(username + ":" + authHash)}`,
 				},
 				body: JSON.stringify(data),
 			});
@@ -204,21 +181,6 @@ class CloudkyAPI {
 			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
 			return Errors.getJson(Error.SERVER_UNREACHABLE);
 		}
-	}
-
-	/**
-	 * Retrieves a token for the current account instance using stored credentials and optional OTP.
-	 * Clears authHash from memory once the token is successfully retrieved.
-	 *
-	 * @returns {Promise<AccountTokenResponse>} A promise that resolves to the account token response object.
-	 */
-	async getToken(): Promise<AccountTokenResponse> {
-		const res = await CloudkyAPI.getToken(this.server, this.username, this.authHash, this.otp);
-		if (res.token) {
-			this.token = res.token;
-			this.authHash = "";
-		}
-		return res;
 	}
 
 	/**
@@ -624,8 +586,9 @@ class CloudkyAPI {
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
 		if (!Validate.userFilePathName(path)) return Errors.getJson(Error.INVALID_FILE_NAME);
-		if (password !== null && !Validate.password(password)) return Errors.getJson(Error.PASSWORD_NOT_HASHED);
 		if (expiration !== null && !Validate.expiration(expiration)) return Errors.getJson(Error.INVALID_EXPIRATION_TIMESTAMP);
+
+		if (password) password = Blake2b.hash(`cloudky2024-${password}-${username}`);
 
 		try {
 			const data = {
