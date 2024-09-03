@@ -26,7 +26,7 @@ import type { AccountDataResponse, AccountTokenResponse } from "@rabbit-company/
 
 ### Creating New Account
 
-To create a new account using the CloudkyAPI, use the createAccount function as shown below:
+To create a new account using the CloudkyAPI, use the `createAccount` function as shown below:
 
 ```js
 const response = await CloudkyAPI.createAccount("https://your-cloudky-server.com", "yourUsername", "yourEmail", "yourPassword", 0);
@@ -40,7 +40,7 @@ if (response.error === Error.SUCCESS) {
 
 ### Getting an Account Token
 
-To authenticate with the Cloudky server, you can retrieve an account token using the getToken method.
+To authenticate with the Cloudky server, you can retrieve an account token using the `getToken` method.
 
 ```js
 const response = await CloudkyAPI.getToken("https://your-cloudky-server.com", "yourUsername", "yourPassword", "yourOTP");
@@ -54,7 +54,7 @@ if (response.token) {
 
 ### Creating an Instance
 
-To use the CloudkyAPI, you first need to create an instance of the CloudkyAPI class with your server URL, username and token.
+To use the `CloudkyAPI`, you first need to create an instance of the `CloudkyAPI` class with your server URL, username and token.
 
 ```js
 const cloudky = new CloudkyAPI("https://your-cloudky-server.com", "yourUsername", "yourToken");
@@ -62,7 +62,7 @@ const cloudky = new CloudkyAPI("https://your-cloudky-server.com", "yourUsername"
 
 ### Retrieving Account Data
 
-Once you have a valid instance of the CloudkyAPI, you can retrieve account data using the getAccountData method.
+Once you have a valid instance of the `CloudkyAPI`, you can retrieve account data using the `getAccountData` method.
 
 ```js
 const accountData = await cloudky.getAccountData();
@@ -76,7 +76,7 @@ if (accountData.error === Error.SUCCESS) {
 
 ### Deleting an Account
 
-To delete an account from the Cloudky server, use the deleteAccount method.
+To delete an account from the Cloudky server, use the `deleteAccount` method.
 
 ```js
 const res = await cloudky.deleteAccount();
@@ -90,7 +90,7 @@ if (res.error === Error.SUCCESS) {
 
 ### Getting List of Files
 
-To list all files, use the listFiles method.
+To list all files, use the `listFiles` method.
 
 ```js
 const res = await cloudky.listFiles();
@@ -104,7 +104,7 @@ if (res.data) {
 
 ### Uploading a File
 
-To upload a file, use the uploadFile method.
+To upload a file, use the `uploadFile` method.
 
 ```js
 const res = await cloudky.uploadFile("Documents/hello.txt", new Blob(["Hello World!"], { type: "text/plain" }));
@@ -118,7 +118,7 @@ if (res.error === Error.SUCCESS) {
 
 ### Downloading a File
 
-To download a file, use the downloadFile method.
+To download a file, use the `downloadFile` method.
 
 ```js
 const res = await cloudky.downloadFile("Documents/hello.txt");
@@ -132,7 +132,7 @@ if (res instanceof Blob) {
 
 ### Moving Files
 
-To move files, use the moveFiles method.
+To move files, use the `moveFiles` method.
 
 ```js
 const res = await cloudky.moveFiles(["Documents/hello.txt"], "Documents/Test");
@@ -146,7 +146,7 @@ if (res.error === Error.SUCCESS) {
 
 ### Renaming File
 
-To rename a files, use the renameFile method.
+To rename a files, use the `renameFile` method.
 
 ```js
 const res = await cloudky.renameFile("Documents/Test/hello.txt", "Documents/Test/helloWorld.txt");
@@ -160,7 +160,7 @@ if (res.error === Error.SUCCESS) {
 
 ### Deleting Files
 
-To delete files, use the deleteFiles method.
+To delete files, use the `deleteFiles` method.
 
 ```js
 const res = await cloudky.deleteFiles(["Documents/Test/helloWorld.txt"]);
@@ -174,7 +174,7 @@ if (res.error === Error.SUCCESS) {
 
 ### Creating Share Link
 
-To create a share link, use the createShareLink method.
+To create a share link, use the `createShareLink` method.
 
 Set the password or expiration to null if you do not want to protect your share link with a password or set an expiry date.
 
@@ -190,7 +190,7 @@ if (res.link) {
 
 ### Getting List of Share Links
 
-To list all share links, use the listShareLinks method.
+To list all share links, use the `listShareLinks` method.
 
 ```js
 const res = await cloudky.listShareLinks();
@@ -199,6 +199,36 @@ if (res.links) {
 	console.log("Share Links: " + res.links);
 } else {
 	console.error("Failed to list share links: " + res.message);
+}
+```
+
+### Downloading a File from Share Link
+
+To download a file from a share link, use the `downloadFromShareLink` method.
+
+Set the password to null if a share link is not protected with a password.
+
+```js
+const res = await cloudky.downloadFromShareLink("DplrSDYswSI8ov8", "Password");
+
+if (res instanceof Blob) {
+	console.log("File from share link downloaded successfully!");
+} else {
+	console.error("Failed to download a file from share link: " + res.message);
+}
+```
+
+### Deleting Share Link
+
+To delete a share link, use the `deleteShareLink` method.
+
+```js
+const res = await cloudky.deleteShareLink("DplrSDYswSI8ov8");
+
+if (res.error === Error.SUCCESS) {
+	console.log("Share Link deleted successfully!");
+} else {
+	console.error("Failed to delete share link: " + res.message);
 }
 ```
 
@@ -212,6 +242,7 @@ The library provides several TypeScript types that are useful for type checking 
 - `FileInformation`: Information about a file.
 - `FileListResponse`: The response object when listing files.
 - `ShareLink`: Information about a shareable link.
+- `ShareLinkCreateResponse`: The response object when creating shareable links.
 - `ShareLinkListResponse`: The response object when listing shareable links.
 
 ## Error Handling
