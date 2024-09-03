@@ -114,6 +114,19 @@ export interface ShareLink {
 }
 
 /**
+ * Represents the response structure for a request for a create share link.
+ * @interface
+ */
+export interface ShareLinkCreateResponse {
+	/** The error code associated with the response. */
+	error: Error;
+	/** A descriptive message providing more information about the response. */
+	info: string;
+	/** Share link */
+	link?: string;
+}
+
+/**
  * Represents the response structure for a request for a list of share links.
  * @interface
  */

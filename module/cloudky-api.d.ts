@@ -216,6 +216,18 @@ export interface ShareLink {
 	Accessed: bigint;
 }
 /**
+ * Represents the response structure for a request for a create share link.
+ * @interface
+ */
+export interface ShareLinkCreateResponse {
+	/** The error code associated with the response. */
+	error: Error$1;
+	/** A descriptive message providing more information about the response. */
+	info: string;
+	/** Share link */
+	link?: string;
+}
+/**
  * Represents the response structure for a request for a list of share links.
  * @interface
  */
@@ -591,9 +603,9 @@ export declare class CloudkyAPI {
 	 * @param {string} path - The path of the file or folder to share.
 	 * @param {string | null} password - Optional password for accessing the share link.
 	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
-	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
+	 * @returns {Promise<ShareLinkCreateResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
 	 */
-	static createShareLink(server: string, username: string, token: string, path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse>;
+	static createShareLink(server: string, username: string, token: string, path: string, password: string | null, expiration: bigint | number | null): Promise<ShareLinkCreateResponse>;
 	/**
 	 * Creates a shareable link for a file or folder.
 	 *
@@ -602,7 +614,7 @@ export declare class CloudkyAPI {
 	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
 	 */
-	createShareLink(path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse>;
+	createShareLink(path: string, password: string | null, expiration: bigint | number | null): Promise<ShareLinkCreateResponse>;
 	/**
 	 * Downloads a file from the share link.
 	 *

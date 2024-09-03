@@ -172,6 +172,22 @@ if (res.error === Error.SUCCESS) {
 }
 ```
 
+### Creating Share Link
+
+To create a share link, use the createShareLink method.
+
+Set the password or expiration to null if you do not want to protect your share link with a password or set an expiry date.
+
+```js
+const res = await cloudky.createShareLink("Documents/Test/helloWorld.txt", "PasswordForShareLink", 1918296000000);
+
+if (res.error === Error.SUCCESS) {
+	console.log("Share Link successfully created!");
+} else {
+	console.error("Failed to create share link: " + res.message);
+}
+```
+
 ## Types
 
 The library provides several TypeScript types that are useful for type checking and code clarity:

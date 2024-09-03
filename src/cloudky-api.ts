@@ -8,6 +8,7 @@ import type {
 	FileListResponse,
 	ShareLink,
 	ShareLinkListResponse,
+	ShareLinkCreateResponse,
 } from "./types";
 import Validate from "./validate";
 import Blake2b from "@rabbit-company/blake2b";
@@ -572,7 +573,7 @@ class CloudkyAPI {
 	 * @param {string} path - The path of the file or folder to share.
 	 * @param {string | null} password - Optional password for accessing the share link.
 	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
-	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
+	 * @returns {Promise<ShareLinkCreateResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
 	 */
 	static async createShareLink(
 		server: string,
@@ -581,7 +582,7 @@ class CloudkyAPI {
 		path: string,
 		password: string | null,
 		expiration: bigint | number | null
-	): Promise<StandardResponse> {
+	): Promise<ShareLinkCreateResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -607,7 +608,7 @@ class CloudkyAPI {
 				body: JSON.stringify(data),
 			});
 
-			const response: StandardResponse = await result.json();
+			const response: ShareLinkCreateResponse = await result.json();
 			if (Validate.response(response)) return response;
 
 			return Errors.getJson(Error.UNKNOWN_ERROR);
@@ -625,7 +626,7 @@ class CloudkyAPI {
 	 * @param {bigint | number | null} expiration - Optional expiration timestamp for the share link.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the share link creation operation.
 	 */
-	async createShareLink(path: string, password: string | null, expiration: bigint | number | null): Promise<StandardResponse> {
+	async createShareLink(path: string, password: string | null, expiration: bigint | number | null): Promise<ShareLinkCreateResponse> {
 		return await CloudkyAPI.createShareLink(this.server, this.username, this.token, path, password, expiration);
 	}
 
@@ -769,5 +770,15 @@ class CloudkyAPI {
 	}
 }
 
-export type { StandardResponse, AccountTokenResponse, AccountData, AccountDataResponse, FileInformation, FileListResponse, ShareLink, ShareLinkListResponse };
+export type {
+	StandardResponse,
+	AccountTokenResponse,
+	AccountData,
+	AccountDataResponse,
+	FileInformation,
+	FileListResponse,
+	ShareLink,
+	ShareLinkCreateResponse,
+	ShareLinkListResponse,
+};
 export { CloudkyAPI, Error, Errors, Validate, Blake2b, Argon2id, PasswordEntropy };
