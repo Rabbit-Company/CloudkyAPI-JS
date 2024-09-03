@@ -1312,10 +1312,12 @@ class CloudkyAPI {
       return errors_default.getJson(1016 /* INVALID_TOKEN */);
     if (!validate_default.userFilePathName(path))
       return errors_default.getJson(1005 /* INVALID_FILE_NAME */);
+    if (password !== null && password_entropy_default.calculate(password) < 75)
+      return errors_default.getJson(1025 /* PASSWORD_TOO_WEAK */);
     if (expiration !== null && !validate_default.expiration(expiration))
       return errors_default.getJson(1021 /* INVALID_EXPIRATION_TIMESTAMP */);
     if (password)
-      password = blake2b_default.hash(`cloudky2024-${password}-${username}`);
+      password = blake2b_default.hash(`cloudky2024-${password}`);
     try {
       const data = {
         path,
@@ -1348,8 +1350,10 @@ class CloudkyAPI {
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.sharelink(link))
       return errors_default.getJson(1023 /* INVALID_SHARE_LINK */);
-    if (password !== null && !validate_default.password(password))
+    if (password !== null && password_entropy_default.calculate(password) < 75)
       return errors_default.getJson(1013 /* INVALID_PASSWORD */);
+    if (password)
+      password = blake2b_default.hash(`cloudky2024-${password}`);
     try {
       const data = {
         link,

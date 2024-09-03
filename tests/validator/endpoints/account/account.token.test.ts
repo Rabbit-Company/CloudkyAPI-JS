@@ -1,9 +1,9 @@
 import { expect, test, describe } from "bun:test";
-import { Blake2b, CloudkyAPI, Error, type AccountTokenResponse } from "../../../../src/cloudky-api";
+import { CloudkyAPI, Error, type AccountTokenResponse } from "../../../../src/cloudky-api";
 
 const server = "http://localhost:8085";
 const username = "test";
-const password = Blake2b.hash("P@ssword123");
+const password = "dtxKQd8ERspwejsABdB4";
 const otp = "";
 
 describe("account token", () => {
@@ -18,8 +18,8 @@ describe("account token", () => {
 	});
 
 	test("invalid password", async () => {
-		const res: AccountTokenResponse = await CloudkyAPI.getToken(server, username, "P@ssword123", otp);
-		expect(res.error).toBe(Error.PASSWORD_NOT_HASHED);
+		const res: AccountTokenResponse = await CloudkyAPI.getToken(server, username, "Password123", otp);
+		expect(res.error).toBe(Error.PASSWORD_TOO_WEAK);
 	});
 
 	test("invalid otp", async () => {

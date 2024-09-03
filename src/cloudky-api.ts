@@ -586,9 +586,10 @@ class CloudkyAPI {
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
 		if (!Validate.userFilePathName(path)) return Errors.getJson(Error.INVALID_FILE_NAME);
+		if (password !== null && PasswordEntropy.calculate(password) < 75) return Errors.getJson(Error.PASSWORD_TOO_WEAK);
 		if (expiration !== null && !Validate.expiration(expiration)) return Errors.getJson(Error.INVALID_EXPIRATION_TIMESTAMP);
 
-		if (password) password = Blake2b.hash(`cloudky2024-${password}-${username}`);
+		if (password) password = Blake2b.hash(`cloudky2024-${password}`);
 
 		try {
 			const data = {
@@ -639,7 +640,9 @@ class CloudkyAPI {
 	static async downloadFromShareLink(server: string, link: string, password: string | null): Promise<Blob | StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.sharelink(link)) return Errors.getJson(Error.INVALID_SHARE_LINK);
-		if (password !== null && !Validate.password(password)) return Errors.getJson(Error.INVALID_PASSWORD);
+		if (password !== null && PasswordEntropy.calculate(password) < 75) return Errors.getJson(Error.INVALID_PASSWORD);
+
+		if (password) password = Blake2b.hash(`cloudky2024-${password}`);
 
 		try {
 			const data = {
