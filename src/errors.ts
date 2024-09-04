@@ -6,7 +6,7 @@ import type { StandardResponse } from "./types";
  * @readonly
  * @enum {number}
  */
-export const enum Error {
+export enum Error {
 	/** Action was executed successfully. */
 	SUCCESS = 0,
 	/** Invalid API endpoint. */

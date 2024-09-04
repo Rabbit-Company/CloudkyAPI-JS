@@ -84,8 +84,8 @@ document.getElementById("btn-sharelink-download")?.addEventListener("click", asy
 		const parts = filePath.value.split("/");
 		const fileName = parts[parts.length - 1];
 
-		let url = window.URL.createObjectURL(res);
-		let a = document.createElement("a");
+		const url = window.URL.createObjectURL(res);
+		const a = document.createElement("a");
 		a.href = url;
 		a.download = fileName;
 		document.body.appendChild(a);
@@ -117,8 +117,8 @@ document.getElementById("btn-file-download")?.addEventListener("click", async ()
 		const parts = filePath.value.split("/");
 		const fileName = parts[parts.length - 1];
 
-		let url = window.URL.createObjectURL(res);
-		let a = document.createElement("a");
+		const url = window.URL.createObjectURL(res);
+		const a = document.createElement("a");
 		a.href = url;
 		a.download = fileName;
 		document.body.appendChild(a);

@@ -3,113 +3,6 @@ import Blake2b from '@rabbit-company/blake2b';
 import PasswordEntropy from '@rabbit-company/password-entropy';
 
 /**
- * Enum representing various error codes used throughout the application.
- * Each error code corresponds to a specific error message.
- * @readonly
- * @enum {number}
- */
-declare const enum Error$1 {
-	/** Action was executed successfully. */
-	SUCCESS = 0,
-	/** Invalid API endpoint. */
-	INVALID_ENDPOINT = 404,
-	/** Bearer Token is missing in Authorization header. */
-	BEARER_TOKEN_MISSING = 1000,
-	/** Required data is missing from the request. */
-	REQUIRED_DATA_MISSING = 1001,
-	/** Registration is disabled on this server. */
-	REGISTRATION_DISABLED = 1002,
-	/** Invalid username format. */
-	INVALID_USERNAME_FORMAT = 1003,
-	/** Password is not hashed using Blake2b algorithm. */
-	PASSWORD_NOT_HASHED = 1004,
-	/** Invalid file name. */
-	INVALID_FILE_NAME = 1005,
-	/** Provided file is invalid. */
-	INVALID_FILE = 1006,
-	/** Username is already registered. */
-	USERNAME_ALREADY_REGISTERED = 1007,
-	/** Invalid API Secret Key in Bearer Token. */
-	INVALID_API_SECRET_KEY = 1008,
-	/** Provided email is invalid. */
-	INVALID_EMAIL = 1009,
-	/** File size exceeds the maximum limit of 50GB. */
-	MAX_FILE_SIZE_EXCEEDED = 1010,
-	/** Missing Authorization header with Username and Password. */
-	MISSING_AUTHORIZATION_HEADER = 1011,
-	/** Provided username is invalid. */
-	INVALID_USERNAME = 1012,
-	/** Provided password is invalid. */
-	INVALID_PASSWORD = 1013,
-	/** Password is incorrect. */
-	INCORRECT_PASSWORD = 1014,
-	/** Redis connection error. */
-	REDIS_CONNECTION_ERROR = 1015,
-	/** Provided token is invalid. */
-	INVALID_TOKEN = 1016,
-	/** Provided token is incorrect or expired. */
-	TOKEN_EXPIRED = 1017,
-	/** Missing username and token in Authorization header. */
-	MISSING_USERNAME_AND_TOKEN = 1018,
-	/** Provided account type is invalid. */
-	INVALID_ACCOUNT_TYPE = 1019,
-	/** Provided upload ID is invalid. */
-	INVALID_UPLOAD_ID = 1020,
-	/** Provided expiration timestamp is invalid. */
-	INVALID_EXPIRATION_TIMESTAMP = 1021,
-	/** Non-existent share link. */
-	NON_EXISTENT_SHARE_LINK = 1022,
-	/** Provided share link is invalid. */
-	INVALID_SHARE_LINK = 1023,
-	/** Provided OTP is invalid. */
-	INVALID_OTP = 1024,
-	/** Provided password is too weak. */
-	PASSWORD_TOO_WEAK = 1025,
-	/** Unknown error occurred. */
-	UNKNOWN_ERROR = 2000,
-	/** Server is unreachable. */
-	SERVER_UNREACHABLE = 5000,
-	/** Invalid response format received from server. */
-	INVALID_RESPONSE_FORMAT = 5001,
-	/** Insufficient permissions to perform this action. */
-	INSUFFICIENT_PERMISSIONS = 9999
-}
-/**
- * Namespace containing error handling utilities.
- * Provides methods to retrieve error details and format error responses in JSON.
- * @namespace
- */
-export declare namespace Errors {
-	/**
-	 * A dictionary mapping error codes to their corresponding messages and HTTP status codes.
-	 * @type {{ [key: number]: { message: string; httpCode: number } }}
-	 */
-	const list: {
-		[key: number]: {
-			message: string;
-			httpCode: number;
-		};
-	};
-	/**
-	 * Retrieves the error details for a given error code.
-	 * @param {Error} id - The error code to retrieve details for.
-	 * @returns {{ message: string; httpCode: number }} An object containing the error message and HTTP status code.
-	 */
-	function get(id: Error$1): {
-		message: string;
-		httpCode: number;
-	};
-	/**
-	 * Formats the error response as a JSON object.
-	 * @param {Error} id - The error code to format.
-	 * @returns {{ error: Error, info: string }} A JSON object containing the error code and message.
-	 */
-	function getJson(id: Error$1): {
-		error: Error$1;
-		info: string;
-	};
-}
-/**
  * Represents a standard response structure with an error code and information message.
  * @interface
  */
@@ -238,6 +131,110 @@ export interface ShareLinkListResponse {
 	info: string;
 	/** Array containing share link objects. */
 	links?: ShareLink[];
+}
+/**
+ * Enum representing various error codes used throughout the application.
+ * Each error code corresponds to a specific error message.
+ * @readonly
+ * @enum {number}
+ */
+declare enum Error$1 {
+	/** Action was executed successfully. */
+	SUCCESS = 0,
+	/** Invalid API endpoint. */
+	INVALID_ENDPOINT = 404,
+	/** Bearer Token is missing in Authorization header. */
+	BEARER_TOKEN_MISSING = 1000,
+	/** Required data is missing from the request. */
+	REQUIRED_DATA_MISSING = 1001,
+	/** Registration is disabled on this server. */
+	REGISTRATION_DISABLED = 1002,
+	/** Invalid username format. */
+	INVALID_USERNAME_FORMAT = 1003,
+	/** Password is not hashed using Blake2b algorithm. */
+	PASSWORD_NOT_HASHED = 1004,
+	/** Invalid file name. */
+	INVALID_FILE_NAME = 1005,
+	/** Provided file is invalid. */
+	INVALID_FILE = 1006,
+	/** Username is already registered. */
+	USERNAME_ALREADY_REGISTERED = 1007,
+	/** Invalid API Secret Key in Bearer Token. */
+	INVALID_API_SECRET_KEY = 1008,
+	/** Provided email is invalid. */
+	INVALID_EMAIL = 1009,
+	/** File size exceeds the maximum limit of 50GB. */
+	MAX_FILE_SIZE_EXCEEDED = 1010,
+	/** Missing Authorization header with Username and Password. */
+	MISSING_AUTHORIZATION_HEADER = 1011,
+	/** Provided username is invalid. */
+	INVALID_USERNAME = 1012,
+	/** Provided password is invalid. */
+	INVALID_PASSWORD = 1013,
+	/** Password is incorrect. */
+	INCORRECT_PASSWORD = 1014,
+	/** Redis connection error. */
+	REDIS_CONNECTION_ERROR = 1015,
+	/** Provided token is invalid. */
+	INVALID_TOKEN = 1016,
+	/** Provided token is incorrect or expired. */
+	TOKEN_EXPIRED = 1017,
+	/** Missing username and token in Authorization header. */
+	MISSING_USERNAME_AND_TOKEN = 1018,
+	/** Provided account type is invalid. */
+	INVALID_ACCOUNT_TYPE = 1019,
+	/** Provided upload ID is invalid. */
+	INVALID_UPLOAD_ID = 1020,
+	/** Provided expiration timestamp is invalid. */
+	INVALID_EXPIRATION_TIMESTAMP = 1021,
+	/** Non-existent share link. */
+	NON_EXISTENT_SHARE_LINK = 1022,
+	/** Provided share link is invalid. */
+	INVALID_SHARE_LINK = 1023,
+	/** Provided OTP is invalid. */
+	INVALID_OTP = 1024,
+	/** Provided password is too weak. */
+	PASSWORD_TOO_WEAK = 1025,
+	/** Unknown error occurred. */
+	UNKNOWN_ERROR = 2000,
+	/** Server is unreachable. */
+	SERVER_UNREACHABLE = 5000,
+	/** Invalid response format received from server. */
+	INVALID_RESPONSE_FORMAT = 5001,
+	/** Insufficient permissions to perform this action. */
+	INSUFFICIENT_PERMISSIONS = 9999
+}
+/**
+ * Namespace containing error handling utilities.
+ * Provides methods to retrieve error details and format error responses in JSON.
+ * @namespace
+ */
+export declare namespace Errors {
+	/**
+	 * A dictionary mapping error codes to their corresponding messages and HTTP status codes.
+	 * @type {{ [key: number]: { message: string; httpCode: number } }}
+	 */
+	const list: {
+		[key: number]: {
+			message: string;
+			httpCode: number;
+		};
+	};
+	/**
+	 * Retrieves the error details for a given error code.
+	 * @param {Error} id - The error code to retrieve details for.
+	 * @returns {{ message: string; httpCode: number }} An object containing the error message and HTTP status code.
+	 */
+	function get(id: Error$1): {
+		message: string;
+		httpCode: number;
+	};
+	/**
+	 * Formats the error response as a JSON object.
+	 * @param {Error} id - The error code to format.
+	 * @returns {StandardResponse} A JSON object containing the error code and message.
+	 */
+	function getJson(id: Error$1): StandardResponse;
 }
 /**
  * The `Validate` namespace provides a collection of validation functions
