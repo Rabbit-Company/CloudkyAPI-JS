@@ -84,13 +84,13 @@ document.getElementById("btn-sharelink-download")?.addEventListener("click", asy
 		const parts = filePath.value.split("/");
 		const fileName = parts[parts.length - 1];
 
-		const url = window.URL.createObjectURL(res);
+		const url = globalThis.URL.createObjectURL(res);
 		const a = document.createElement("a");
 		a.href = url;
 		a.download = fileName;
 		document.body.appendChild(a);
 		a.click();
-		window.URL.revokeObjectURL(url);
+		globalThis.URL.revokeObjectURL(url);
 		document.body.removeChild(a);
 	} else {
 		printResponse(res);
@@ -117,13 +117,13 @@ document.getElementById("btn-file-download")?.addEventListener("click", async ()
 		const parts = filePath.value.split("/");
 		const fileName = parts[parts.length - 1];
 
-		const url = window.URL.createObjectURL(res);
+		const url = globalThis.URL.createObjectURL(res);
 		const a = document.createElement("a");
 		a.href = url;
 		a.download = fileName;
 		document.body.appendChild(a);
 		a.click();
-		window.URL.revokeObjectURL(url);
+		globalThis.URL.revokeObjectURL(url);
 		document.body.removeChild(a);
 	} else {
 		printResponse(res);

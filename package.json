@@ -1,6 +1,6 @@
 {
 	"name": "@rabbit-company/cloudky-api",
-	"version": "0.0.2",
+	"version": "0.1.0",
 	"description": "API for Cloudky Server",
 	"main": "./module/cloudky-api.js",
 	"browser": "./module/cloudky-api.js",
@@ -36,15 +36,15 @@
 		"storage"
 	],
 	"devDependencies": {
-		"@types/bun": "^1.1.8",
+		"@types/bun": "^1.1.9",
 		"bun-plugin-dts": "^0.2.3",
 		"@rabbit-company/logger": "npm:@jsr/rabbit-company__logger@4.0.1"
 	},
 	"peerDependencies": {
-		"typescript": "^5.5.4"
+		"typescript": "^5.6.2"
 	},
 	"dependencies": {
-		"@rabbit-company/argon2id": "npm:@jsr/rabbit-company__argon2id@2.0.1",
+		"@rabbit-company/argon2id": "npm:@jsr/rabbit-company__argon2id@2.1.0",
 		"@rabbit-company/blake2b": "npm:@jsr/rabbit-company__blake2b@2.1.1",
 		"@rabbit-company/password-entropy": "npm:@jsr/rabbit-company__password-entropy@2.1.1"
 	}
