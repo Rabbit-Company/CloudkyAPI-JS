@@ -1,14 +1,15 @@
 import Errors, { Error } from "./errors";
-import type {
-	StandardResponse,
-	AccountTokenResponse,
-	AccountData,
-	AccountDataResponse,
-	FileInformation,
-	FileListResponse,
-	ShareLink,
-	ShareLinkListResponse,
-	ShareLinkCreateResponse,
+import {
+	type StandardResponse,
+	type AccountTokenResponse,
+	type AccountData,
+	type AccountDataResponse,
+	type FileInformation,
+	type FileListResponse,
+	type ShareLink,
+	type ShareLinkListResponse,
+	type ShareLinkCreateResponse,
+	StorageType,
 } from "./types";
 import Validate from "./validate";
 import Blake2b from "@rabbit-company/blake2b";
@@ -25,6 +26,7 @@ class CloudkyAPI {
 	server: string;
 	username: string;
 	token: string;
+	storageType: StorageType;
 
 	/**
 	 * Creates an instance of CloudkyAPI.
@@ -38,6 +40,7 @@ class CloudkyAPI {
 		this.server = server;
 		this.username = username;
 		this.token = token;
+		this.storageType = StorageType.LOCAL;
 	}
 
 	/**
@@ -221,7 +224,9 @@ class CloudkyAPI {
 	 * @returns {Promise<AccountDataResponse>} A promise that resolves to the account data response object.
 	 */
 	async getAccountData(): Promise<AccountDataResponse> {
-		return await CloudkyAPI.getAccountData(this.server, this.username, this.token);
+		const res = await CloudkyAPI.getAccountData(this.server, this.username, this.token);
+		if (res.data) this.storageType = res.data.StorageType;
+		return res;
 	}
 
 	/**
@@ -388,6 +393,15 @@ class CloudkyAPI {
 				if (Validate.response(response)) return response;
 				return Errors.getJson(Error.UNKNOWN_ERROR);
 			}
+
+			try {
+				const response = await result.json();
+				if (response.link && typeof response.link === "string") {
+					const s3Response = await fetch(response.link);
+					if (!s3Response.ok) return Errors.getJson(Error.SERVER_UNREACHABLE);
+					return await s3Response.blob();
+				}
+			} catch {}
 
 			return await result.blob();
 		} catch (err) {
@@ -661,6 +675,15 @@ class CloudkyAPI {
 				if (Validate.response(response)) return response;
 				return Errors.getJson(Error.UNKNOWN_ERROR);
 			}
+
+			try {
+				const response = await result.json();
+				if (response.link && typeof response.link === "string") {
+					const s3Response = await fetch(response.link);
+					if (!s3Response.ok) return Errors.getJson(Error.SERVER_UNREACHABLE);
+					return await s3Response.blob();
+				}
+			} catch {}
 
 			return await result.blob();
 		} catch (err) {

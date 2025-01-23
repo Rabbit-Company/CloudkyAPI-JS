@@ -2,6 +2,12 @@ import Argon2id from '@rabbit-company/argon2id';
 import Blake2b from '@rabbit-company/blake2b';
 import PasswordEntropy from '@rabbit-company/password-entropy';
 
+declare enum StorageType {
+	/** Local storage, typically on the same server or machine. */
+	"LOCAL" = 0,
+	/** Storage using Amazon S3 or an S3-compatible service. */
+	"S3" = 1
+}
 /**
  * Represents a standard response structure with an error code and information message.
  * @interface
@@ -46,7 +52,7 @@ export interface AccountData {
 	/** The type of account, represented as a number (e.g., 0 for basic, 1 for file E2EE). */
 	AccountType: number;
 	/** The type of storage used by the server (e.g., "LOCAL", "S3"). */
-	StorageType: string;
+	StorageType: StorageType;
 	/** The timestamp when the account was created, represented as a bigint. */
 	Created: bigint;
 }
@@ -392,6 +398,7 @@ export declare class CloudkyAPI {
 	server: string;
 	username: string;
 	token: string;
+	storageType: StorageType;
 	/**
 	 * Creates an instance of CloudkyAPI.
 	 *
