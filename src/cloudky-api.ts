@@ -360,15 +360,16 @@ class CloudkyAPI {
 	}
 
 	/**
-	 * Downloads a file from the server.
+	 * Generates a download link to download a file from the server.
 	 *
 	 * @param {string} server - The URL of the server from which to download the file.
 	 * @param {string} username - The username of the account making the request.
 	 * @param {string} token - The token for authenticating the request.
+	 * @param {StorageType} storageType - The type of storage to download the file from (e.g., LOCAL or S3).
 	 * @param {string} path - The path of the file to be downloaded.
-	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
+	 * @returns {Promise<string | StandardResponse>} A promise that resolves to a string containing the download URL on success, or a standard response object on error.
 	 */
-	static async downloadFile(server: string, username: string, token: string, path: string): Promise<Blob | StandardResponse> {
+	static async downloadFile(server: string, username: string, token: string, storageType: StorageType, path: string): Promise<string | StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -394,16 +395,16 @@ class CloudkyAPI {
 				return Errors.getJson(Error.UNKNOWN_ERROR);
 			}
 
-			try {
-				const response = await result.json();
-				if (response.link && typeof response.link === "string") {
-					const s3Response = await fetch(response.link);
-					if (!s3Response.ok) return Errors.getJson(Error.SERVER_UNREACHABLE);
-					return await s3Response.blob();
-				}
-			} catch {}
+			let downloadLink: string | null = null;
 
-			return await result.blob();
+			const response = await result.json();
+			if (storageType === StorageType.S3) {
+				downloadLink = response.link;
+			} else {
+				downloadLink = `${server}/v1/file/download?token=${response.token}`;
+			}
+
+			return downloadLink ? downloadLink : Errors.getJson(Error.UNKNOWN_ERROR);
 		} catch (err) {
 			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
 			return Errors.getJson(Error.SERVER_UNREACHABLE);
@@ -411,13 +412,13 @@ class CloudkyAPI {
 	}
 
 	/**
-	 * Downloads a file from the server.
+	 * Generates a download link to download a file from the server.
 	 *
 	 * @param {string} path - The path of the file to be downloaded.
-	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
+	 * @returns {Promise<string | StandardResponse>} A promise that resolves to a string containing the download URL on success, or a standard response object on error.
 	 */
-	async downloadFile(path: string): Promise<Blob | StandardResponse> {
-		return await CloudkyAPI.downloadFile(this.server, this.username, this.token, path);
+	async downloadFile(path: string): Promise<string | StandardResponse> {
+		return await CloudkyAPI.downloadFile(this.server, this.username, this.token, this.storageType, path);
 	}
 
 	/**
@@ -532,11 +533,19 @@ class CloudkyAPI {
 	 * @param {string} server - The URL of the server where the file will be uploaded.
 	 * @param {string} username - The username of the account making the request.
 	 * @param {string} token - The token for authenticating the request.
+	 * @param {StorageType} storageType - The type of storage to upload the file to (e.g., LOCAL or S3).
 	 * @param {string} destination - The destination path where the file will be uploaded.
 	 * @param {Blob} fileContent - The content of the file to be uploaded.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the upload operation.
 	 */
-	static async uploadFile(server: string, username: string, token: string, destination: string, fileContent: Blob): Promise<StandardResponse> {
+	static async uploadFile(
+		server: string,
+		username: string,
+		token: string,
+		storageType: StorageType,
+		destination: string,
+		fileContent: Blob
+	): Promise<StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -575,7 +584,7 @@ class CloudkyAPI {
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the upload operation.
 	 */
 	async uploadFile(destination: string, fileContent: Blob): Promise<StandardResponse> {
-		return await CloudkyAPI.uploadFile(this.server, this.username, this.token, destination, fileContent);
+		return await CloudkyAPI.uploadFile(this.server, this.username, this.token, this.storageType, destination, fileContent);
 	}
 
 	/**

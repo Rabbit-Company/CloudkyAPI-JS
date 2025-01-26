@@ -123,10 +123,10 @@ To download a file, use the `downloadFile` method.
 ```js
 const res = await cloudky.downloadFile("Documents/hello.txt");
 
-if (res instanceof Blob) {
-	console.log("File downloaded successfully!");
+if (typeof res === "string") {
+	console.log("Download link successfully generated! Link: " + res);
 } else {
-	console.error("Failed to download a file: " + res.message);
+	console.error("Failed to generate download link: " + res.message);
 }
 ```
 

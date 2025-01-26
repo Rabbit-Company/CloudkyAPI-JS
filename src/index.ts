@@ -113,18 +113,14 @@ document.getElementById("btn-file-upload")?.addEventListener("click", async () =
 document.getElementById("btn-file-download")?.addEventListener("click", async () => {
 	latency = Date.now();
 	const res = await cloudky.downloadFile(filePath.value);
-	if (res instanceof Blob) {
-		const parts = filePath.value.split("/");
-		const fileName = parts[parts.length - 1];
-
-		const url = globalThis.URL.createObjectURL(res);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = fileName;
-		document.body.appendChild(a);
-		a.click();
-		globalThis.URL.revokeObjectURL(url);
-		document.body.removeChild(a);
+	if (typeof res === "string") {
+		const link = document.createElement("a");
+		link.href = res;
+		link.target = "_blank";
+		link.download = "";
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
 	} else {
 		printResponse(res);
 	}

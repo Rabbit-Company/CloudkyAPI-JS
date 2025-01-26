@@ -29,6 +29,7 @@ var Error2;
   Error3[Error3["INVALID_SHARE_LINK"] = 1023] = "INVALID_SHARE_LINK";
   Error3[Error3["INVALID_OTP"] = 1024] = "INVALID_OTP";
   Error3[Error3["PASSWORD_TOO_WEAK"] = 1025] = "PASSWORD_TOO_WEAK";
+  Error3[Error3["FILE_NOT_FOUND"] = 1026] = "FILE_NOT_FOUND";
   Error3[Error3["UNKNOWN_ERROR"] = 2000] = "UNKNOWN_ERROR";
   Error3[Error3["SERVER_UNREACHABLE"] = 5000] = "SERVER_UNREACHABLE";
   Error3[Error3["INVALID_RESPONSE_FORMAT"] = 5001] = "INVALID_RESPONSE_FORMAT";
@@ -65,6 +66,7 @@ var Errors;
     1023: { message: "Provided share link is invalid.", httpCode: 400 },
     1024: { message: "Provided OTP is invalid.", httpCode: 400 },
     1025: { message: "Your password is too weak!", httpCode: 400 },
+    1026: { message: "File not found on the provided file path.", httpCode: 404 },
     2000: { message: "Something went wrong while trying to perform this action. Please try again later.", httpCode: 500 },
     5000: { message: "Server is unreachable!", httpCode: 503 },
     9999: { message: "Your do not have permission to perform this action.", httpCode: 403 }
@@ -1160,7 +1162,7 @@ class CloudkyAPI {
   async deleteFiles(paths) {
     return await CloudkyAPI.deleteFiles(this.server, this.username, this.token, paths);
   }
-  static async downloadFile(server, username, token, path) {
+  static async downloadFile(server, username, token, storageType, path) {
     if (!validate_default.url(server))
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(username))
@@ -1182,22 +1184,19 @@ class CloudkyAPI {
         body: JSON.stringify(data)
       });
       if (result.status !== 200) {
-        const response = await result.json();
-        if (validate_default.response(response))
-          return response;
+        const response2 = await result.json();
+        if (validate_default.response(response2))
+          return response2;
         return errors_default.getJson(2000 /* UNKNOWN_ERROR */);
       }
-      try {
-        const response = await result.json();
-        if (response.link && typeof response.link === "string") {
-          const s3Response = await fetch(response.link);
-          if (!s3Response.ok)
-            return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
-          return await s3Response.blob();
-        }
-      } catch {
+      let downloadLink = null;
+      const response = await result.json();
+      if (storageType === 1 /* S3 */) {
+        downloadLink = response.link;
+      } else {
+        downloadLink = `${server}/v1/file/download?token=${response.token}`;
       }
-      return await result.blob();
+      return downloadLink ? downloadLink : errors_default.getJson(2000 /* UNKNOWN_ERROR */);
     } catch (err) {
       if (err instanceof SyntaxError)
         return errors_default.getJson(5001 /* INVALID_RESPONSE_FORMAT */);
@@ -1205,7 +1204,7 @@ class CloudkyAPI {
     }
   }
   async downloadFile(path) {
-    return await CloudkyAPI.downloadFile(this.server, this.username, this.token, path);
+    return await CloudkyAPI.downloadFile(this.server, this.username, this.token, this.storageType, path);
   }
   static async moveFiles(server, username, token, files, destination) {
     if (!validate_default.url(server))
@@ -1281,7 +1280,7 @@ class CloudkyAPI {
   async renameFile(path, destination) {
     return await CloudkyAPI.renameFile(this.server, this.username, this.token, path, destination);
   }
-  static async uploadFile(server, username, token, destination, fileContent) {
+  static async uploadFile(server, username, token, storageType, destination, fileContent) {
     if (!validate_default.url(server))
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(username))
@@ -1316,7 +1315,7 @@ class CloudkyAPI {
     }
   }
   async uploadFile(destination, fileContent) {
-    return await CloudkyAPI.uploadFile(this.server, this.username, this.token, destination, fileContent);
+    return await CloudkyAPI.uploadFile(this.server, this.username, this.token, this.storageType, destination, fileContent);
   }
   static async createShareLink(server, username, token, path, password, expiration) {
     if (!validate_default.url(server))

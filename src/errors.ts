@@ -63,6 +63,8 @@ export enum Error {
 	INVALID_OTP = 1024,
 	/** Provided password is too weak. */
 	PASSWORD_TOO_WEAK = 1025,
+	/** File on provided path does not exists. */
+	FILE_NOT_FOUND = 1026,
 	/** Unknown error occurred. */
 	UNKNOWN_ERROR = 2000,
 	/** Server is unreachable. */
@@ -112,6 +114,7 @@ namespace Errors {
 		1023: { message: "Provided share link is invalid.", httpCode: 400 },
 		1024: { message: "Provided OTP is invalid.", httpCode: 400 },
 		1025: { message: "Your password is too weak!", httpCode: 400 },
+		1026: { message: "File not found on the provided file path.", httpCode: 404 },
 		2000: { message: "Something went wrong while trying to perform this action. Please try again later.", httpCode: 500 },
 		5000: { message: "Server is unreachable!", httpCode: 503 },
 		9999: { message: "Your do not have permission to perform this action.", httpCode: 403 },

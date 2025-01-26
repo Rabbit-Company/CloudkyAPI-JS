@@ -201,6 +201,8 @@ declare enum Error$1 {
 	INVALID_OTP = 1024,
 	/** Provided password is too weak. */
 	PASSWORD_TOO_WEAK = 1025,
+	/** File on provided path does not exists. */
+	FILE_NOT_FOUND = 1026,
 	/** Unknown error occurred. */
 	UNKNOWN_ERROR = 2000,
 	/** Server is unreachable. */
@@ -525,22 +527,23 @@ export declare class CloudkyAPI {
 	 */
 	deleteFiles(paths: string[]): Promise<StandardResponse>;
 	/**
-	 * Downloads a file from the server.
+	 * Generates a download link to download a file from the server.
 	 *
 	 * @param {string} server - The URL of the server from which to download the file.
 	 * @param {string} username - The username of the account making the request.
 	 * @param {string} token - The token for authenticating the request.
+	 * @param {StorageType} storageType - The type of storage to download the file from (e.g., LOCAL or S3).
 	 * @param {string} path - The path of the file to be downloaded.
-	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
+	 * @returns {Promise<string | StandardResponse>} A promise that resolves to a string containing the download URL on success, or a standard response object on error.
 	 */
-	static downloadFile(server: string, username: string, token: string, path: string): Promise<Blob | StandardResponse>;
+	static downloadFile(server: string, username: string, token: string, storageType: StorageType, path: string): Promise<string | StandardResponse>;
 	/**
-	 * Downloads a file from the server.
+	 * Generates a download link to download a file from the server.
 	 *
 	 * @param {string} path - The path of the file to be downloaded.
-	 * @returns {Promise<Blob | StandardResponse>} A promise that resolves to a Blob containing the file data or a standard response object in case of an error.
+	 * @returns {Promise<string | StandardResponse>} A promise that resolves to a string containing the download URL on success, or a standard response object on error.
 	 */
-	downloadFile(path: string): Promise<Blob | StandardResponse>;
+	downloadFile(path: string): Promise<string | StandardResponse>;
 	/**
 	 * Moves specified files to a new destination on the server.
 	 *
@@ -585,11 +588,12 @@ export declare class CloudkyAPI {
 	 * @param {string} server - The URL of the server where the file will be uploaded.
 	 * @param {string} username - The username of the account making the request.
 	 * @param {string} token - The token for authenticating the request.
+	 * @param {StorageType} storageType - The type of storage to upload the file to (e.g., LOCAL or S3).
 	 * @param {string} destination - The destination path where the file will be uploaded.
 	 * @param {Blob} fileContent - The content of the file to be uploaded.
 	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the upload operation.
 	 */
-	static uploadFile(server: string, username: string, token: string, destination: string, fileContent: Blob): Promise<StandardResponse>;
+	static uploadFile(server: string, username: string, token: string, storageType: StorageType, destination: string, fileContent: Blob): Promise<StandardResponse>;
 	/**
 	 * Uploads a file to the server.
 	 *
