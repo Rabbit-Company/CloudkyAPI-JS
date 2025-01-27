@@ -395,16 +395,9 @@ class CloudkyAPI {
 				return Errors.getJson(Error.UNKNOWN_ERROR);
 			}
 
-			let downloadLink: string | null = null;
-
 			const response = await result.json();
-			if (storageType === StorageType.S3) {
-				downloadLink = response.link;
-			} else {
-				downloadLink = `${server}/v1/file/download?token=${response.token}`;
-			}
 
-			return downloadLink ? downloadLink : Errors.getJson(Error.UNKNOWN_ERROR);
+			return response.link || Errors.getJson(Error.UNKNOWN_ERROR);
 		} catch (err) {
 			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
 			return Errors.getJson(Error.SERVER_UNREACHABLE);
