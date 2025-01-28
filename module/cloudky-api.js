@@ -1162,7 +1162,7 @@ class CloudkyAPI {
   async deleteFiles(paths) {
     return await CloudkyAPI.deleteFiles(this.server, this.username, this.token, paths);
   }
-  static async downloadFile(server, username, token, storageType, path) {
+  static async generateFileDownloadLink(server, username, token, path) {
     if (!validate_default.url(server))
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(username))
@@ -1197,8 +1197,8 @@ class CloudkyAPI {
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     }
   }
-  async downloadFile(path) {
-    return await CloudkyAPI.downloadFile(this.server, this.username, this.token, this.storageType, path);
+  async generateFileDownloadLink(path) {
+    return await CloudkyAPI.generateFileDownloadLink(this.server, this.username, this.token, path);
   }
   static async moveFiles(server, username, token, files, destination) {
     if (!validate_default.url(server))
@@ -1274,7 +1274,7 @@ class CloudkyAPI {
   async renameFile(path, destination) {
     return await CloudkyAPI.renameFile(this.server, this.username, this.token, path, destination);
   }
-  static async uploadFile(server, username, token, storageType, destination, fileContent) {
+  static async generateUploadFileLink(server, username, token, destination) {
     if (!validate_default.url(server))
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     if (!validate_default.username(username))
@@ -1283,33 +1283,34 @@ class CloudkyAPI {
       return errors_default.getJson(1016 /* INVALID_TOKEN */);
     if (!validate_default.userFilePathName(destination))
       return errors_default.getJson(1005 /* INVALID_FILE_NAME */);
-    if (fileContent.size === 0)
-      return errors_default.getJson(1006 /* INVALID_FILE */);
-    if (fileContent.size > 53687091200)
-      return errors_default.getJson(1010 /* MAX_FILE_SIZE_EXCEEDED */);
     try {
-      const formData = new FormData;
-      formData.append("name", destination);
-      formData.append("file", fileContent);
+      const data = {
+        path: destination
+      };
       const result = await fetch(server + "/v1/file/upload", {
-        method: "PUT",
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Basic ${btoa(username + ":" + token)}`
         },
-        body: formData
+        body: JSON.stringify(data)
       });
+      if (result.status !== 200) {
+        const response2 = await result.json();
+        if (validate_default.response(response2))
+          return response2;
+        return errors_default.getJson(2000 /* UNKNOWN_ERROR */);
+      }
       const response = await result.json();
-      if (validate_default.response(response))
-        return response;
-      return errors_default.getJson(2000 /* UNKNOWN_ERROR */);
+      return response.link || errors_default.getJson(2000 /* UNKNOWN_ERROR */);
     } catch (err) {
       if (err instanceof SyntaxError)
         return errors_default.getJson(5001 /* INVALID_RESPONSE_FORMAT */);
       return errors_default.getJson(5000 /* SERVER_UNREACHABLE */);
     }
   }
-  async uploadFile(destination, fileContent) {
-    return await CloudkyAPI.uploadFile(this.server, this.username, this.token, this.storageType, destination, fileContent);
+  async generateUploadFileLink(destination) {
+    return await CloudkyAPI.generateUploadFileLink(this.server, this.username, this.token, destination);
   }
   static async createShareLink(server, username, token, path, password, expiration) {
     if (!validate_default.url(server))

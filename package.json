@@ -1,6 +1,6 @@
 {
 	"name": "@rabbit-company/cloudky-api",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "API for Cloudky Server",
 	"main": "./module/cloudky-api.js",
 	"browser": "./module/cloudky-api.js",

@@ -5,33 +5,42 @@ import { StorageType } from "../../../../src/types";
 const server = "http://localhost:8085";
 const username = "test";
 const token = Blake2b.hash("P@ssword123");
-const storageType = StorageType.LOCAL;
 const destination = "test/HelloWorld.txt";
-const fileContent = new Blob(["Hello, world! This is the file content."], { type: "text/plain" });
 
 describe("file upload", () => {
 	test("invalid server", async () => {
-		const res: StandardResponse = await CloudkyAPI.uploadFile("invalid server", username, token, storageType, destination, fileContent);
+		const res = await CloudkyAPI.generateUploadFileLink("invalid server", username, token, destination);
+		if (typeof res === "string") {
+			expect(false).toBe(true);
+			return;
+		}
 		expect(res.error).toBe(Error.SERVER_UNREACHABLE);
 	});
 
 	test("invalid username", async () => {
-		const res: StandardResponse = await CloudkyAPI.uploadFile(server, "test.test123", token, storageType, destination, fileContent);
+		const res = await CloudkyAPI.generateUploadFileLink(server, "test.test123", token, destination);
+		if (typeof res === "string") {
+			expect(false).toBe(true);
+			return;
+		}
 		expect(res.error).toBe(Error.INVALID_USERNAME_FORMAT);
 	});
 
 	test("invalid token", async () => {
-		const res: StandardResponse = await CloudkyAPI.uploadFile(server, username, "test", storageType, destination, fileContent);
+		const res = await CloudkyAPI.generateUploadFileLink(server, username, "test", destination);
+		if (typeof res === "string") {
+			expect(false).toBe(true);
+			return;
+		}
 		expect(res.error).toBe(Error.INVALID_TOKEN);
 	});
 
 	test("invalid destination", async () => {
-		const res: StandardResponse = await CloudkyAPI.uploadFile(server, username, token, storageType, "../test.png", fileContent);
+		const res = await CloudkyAPI.generateUploadFileLink(server, username, token, "../test.png");
+		if (typeof res === "string") {
+			expect(false).toBe(true);
+			return;
+		}
 		expect(res.error).toBe(Error.INVALID_FILE_NAME);
-	});
-
-	test("invalid file content", async () => {
-		const res: StandardResponse = await CloudkyAPI.uploadFile(server, username, token, storageType, destination, new Blob([], { type: "text/plain" }));
-		expect(res.error).toBe(Error.INVALID_FILE);
 	});
 });

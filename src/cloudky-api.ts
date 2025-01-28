@@ -360,16 +360,20 @@ class CloudkyAPI {
 	}
 
 	/**
-	 * Generates a download link to download a file from the server.
+	 * Generates a download link for a file stored on the server.
+	 *
+	 * This method creates a temporary download URL for the specified file.
+	 * The returned URL can be used to download the file directly.
 	 *
 	 * @param {string} server - The URL of the server from which to download the file.
 	 * @param {string} username - The username of the account making the request.
 	 * @param {string} token - The token for authenticating the request.
-	 * @param {StorageType} storageType - The type of storage to download the file from (e.g., LOCAL or S3).
 	 * @param {string} path - The path of the file to be downloaded.
-	 * @returns {Promise<string | StandardResponse>} A promise that resolves to a string containing the download URL on success, or a standard response object on error.
+	 * @returns {Promise<string | StandardResponse>} A promise that resolves to:
+	 * - `string`: A download URL if the operation is successful.
+	 * - `StandardResponse`: An object containing error details if the operation fails.
 	 */
-	static async downloadFile(server: string, username: string, token: string, storageType: StorageType, path: string): Promise<string | StandardResponse> {
+	static async generateFileDownloadLink(server: string, username: string, token: string, path: string): Promise<string | StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
@@ -405,13 +409,18 @@ class CloudkyAPI {
 	}
 
 	/**
-	 * Generates a download link to download a file from the server.
+	 * Generates a download link for a file stored on the server.
 	 *
-	 * @param {string} path - The path of the file to be downloaded.
-	 * @returns {Promise<string | StandardResponse>} A promise that resolves to a string containing the download URL on success, or a standard response object on error.
+	 * This method creates a temporary download URL for the specified file.
+	 * The returned URL can be used to download the file directly.
+	 *
+	 * @param {string} path - The path of the file to be downloaded on the server.
+	 * @returns {Promise<string | StandardResponse>} A promise that resolves to:
+	 * - `string`: A download URL if the operation is successful.
+	 * - `StandardResponse`: An object containing error details if the operation fails.
 	 */
-	async downloadFile(path: string): Promise<string | StandardResponse> {
-		return await CloudkyAPI.downloadFile(this.server, this.username, this.token, this.storageType, path);
+	async generateFileDownloadLink(path: string): Promise<string | StandardResponse> {
+		return await CloudkyAPI.generateFileDownloadLink(this.server, this.username, this.token, path);
 	}
 
 	/**
@@ -521,48 +530,49 @@ class CloudkyAPI {
 	}
 
 	/**
-	 * Uploads a file to the server.
+	 * Generates an upload link for a specified destination on the server.
 	 *
-	 * @param {string} server - The URL of the server where the file will be uploaded.
-	 * @param {string} username - The username of the account making the request.
-	 * @param {string} token - The token for authenticating the request.
-	 * @param {StorageType} storageType - The type of storage to upload the file to (e.g., LOCAL or S3).
-	 * @param {string} destination - The destination path where the file will be uploaded.
-	 * @param {Blob} fileContent - The content of the file to be uploaded.
-	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the upload operation.
+	 * This method validates the provided inputs, sends a request to the server to create
+	 * an upload link, and returns a standard response with the result. If the operation
+	 * succeeds, the response includes the generated upload link.
+	 *
+	 * @param {string} server - The base URL of the server where the upload link will be generated. Must be a valid URL.
+	 * @param {string} username - The username of the account initiating the request. Must conform to a valid username format.
+	 * @param {string} token - The authentication token for verifying the request. Must be a valid token string.
+	 * @param {string} destination - The destination path on the server where the upload link will be created. Must be a valid file path.
+	 * @returns {Promise<StandardResponse>} A promise that resolves to a `StandardResponse` object:
+	 * - On success: Contains details about the upload link and the operation result.
+	 * - On failure: Includes error details describing what went wrong.
 	 */
-	static async uploadFile(
-		server: string,
-		username: string,
-		token: string,
-		storageType: StorageType,
-		destination: string,
-		fileContent: Blob
-	): Promise<StandardResponse> {
+	static async generateUploadFileLink(server: string, username: string, token: string, destination: string): Promise<string | StandardResponse> {
 		if (!Validate.url(server)) return Errors.getJson(Error.SERVER_UNREACHABLE);
 		if (!Validate.username(username)) return Errors.getJson(Error.INVALID_USERNAME_FORMAT);
 		if (!Validate.token(token)) return Errors.getJson(Error.INVALID_TOKEN);
 		if (!Validate.userFilePathName(destination)) return Errors.getJson(Error.INVALID_FILE_NAME);
-		if (fileContent.size === 0) return Errors.getJson(Error.INVALID_FILE);
-		if (fileContent.size > 53_687_091_200) return Errors.getJson(Error.MAX_FILE_SIZE_EXCEEDED);
 
 		try {
-			const formData = new FormData();
-			formData.append("name", destination);
-			formData.append("file", fileContent);
+			const data = {
+				path: destination,
+			};
 
 			const result = await fetch(server + "/v1/file/upload", {
-				method: "PUT",
+				method: "POST",
 				headers: {
+					"Content-Type": "application/json",
 					Authorization: `Basic ${btoa(username + ":" + token)}`,
 				},
-				body: formData,
+				body: JSON.stringify(data),
 			});
 
-			const response: StandardResponse = await result.json();
-			if (Validate.response(response)) return response;
+			if (result.status !== 200) {
+				const response: StandardResponse = await result.json();
+				if (Validate.response(response)) return response;
+				return Errors.getJson(Error.UNKNOWN_ERROR);
+			}
 
-			return Errors.getJson(Error.UNKNOWN_ERROR);
+			const response = await result.json();
+
+			return response.link || Errors.getJson(Error.UNKNOWN_ERROR);
 		} catch (err) {
 			if (err instanceof SyntaxError) return Errors.getJson(Error.INVALID_RESPONSE_FORMAT);
 			return Errors.getJson(Error.SERVER_UNREACHABLE);
@@ -570,14 +580,19 @@ class CloudkyAPI {
 	}
 
 	/**
-	 * Uploads a file to the server.
+	 * Generates an upload link for a specified destination on the server.
 	 *
-	 * @param {string} destination - The destination path where the file will be uploaded.
-	 * @param {Blob} fileContent - The content of the file to be uploaded.
-	 * @returns {Promise<StandardResponse>} A promise that resolves to the standard response object indicating the result of the upload operation.
+	 * This method creates an upload link for the provided destination path, allowing
+	 * the user to upload files to that location. It validates the request and returns
+	 * the result as a standard response.
+	 *
+	 * @param {string} destination - The destination path on the server where the upload link will be created. Must be a valid file path.
+	 * @returns {Promise<StandardResponse>} A promise that resolves to a `StandardResponse` object:
+	 * - On success: Contains details about the upload link and the operation result.
+	 * - On failure: Includes error details describing what went wrong.
 	 */
-	async uploadFile(destination: string, fileContent: Blob): Promise<StandardResponse> {
-		return await CloudkyAPI.uploadFile(this.server, this.username, this.token, this.storageType, destination, fileContent);
+	async generateUploadFileLink(destination: string): Promise<string | StandardResponse> {
+		return await CloudkyAPI.generateUploadFileLink(this.server, this.username, this.token, destination);
 	}
 
 	/**

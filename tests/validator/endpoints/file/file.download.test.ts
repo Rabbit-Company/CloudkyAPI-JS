@@ -1,16 +1,14 @@
 import { expect, test, describe } from "bun:test";
 import { Blake2b, CloudkyAPI, Error, type StandardResponse } from "../../../../src/cloudky-api";
-import { StorageType } from "../../../../src/types";
 
 const server = "http://localhost:8085";
 const username = "test";
 const token = Blake2b.hash("P@ssword123");
-const storageType = StorageType.LOCAL;
 const file = "cats/cat.png";
 
 describe("file download", () => {
 	test("invalid server", async () => {
-		const res: string | StandardResponse = await CloudkyAPI.downloadFile("invalid server", username, token, storageType, file);
+		const res: string | StandardResponse = await CloudkyAPI.generateFileDownloadLink("invalid server", username, token, file);
 		if (typeof res === "string") {
 			expect(false).toBe(true);
 			return;
@@ -19,7 +17,7 @@ describe("file download", () => {
 	});
 
 	test("invalid username", async () => {
-		const res: string | StandardResponse = await CloudkyAPI.downloadFile(server, "test.test123", token, storageType, file);
+		const res: string | StandardResponse = await CloudkyAPI.generateFileDownloadLink(server, "test.test123", token, file);
 		if (typeof res === "string") {
 			expect(false).toBe(true);
 			return;
@@ -28,7 +26,7 @@ describe("file download", () => {
 	});
 
 	test("invalid token", async () => {
-		const res: string | StandardResponse = await CloudkyAPI.downloadFile(server, username, "test", storageType, file);
+		const res: string | StandardResponse = await CloudkyAPI.generateFileDownloadLink(server, username, "test", file);
 		if (typeof res === "string") {
 			expect(false).toBe(true);
 			return;
@@ -37,7 +35,7 @@ describe("file download", () => {
 	});
 
 	test("invalid file name", async () => {
-		const res: string | StandardResponse = await CloudkyAPI.downloadFile(server, username, token, storageType, "../test.png");
+		const res: string | StandardResponse = await CloudkyAPI.generateFileDownloadLink(server, username, token, "../test.png");
 		if (typeof res === "string") {
 			expect(false).toBe(true);
 			return;

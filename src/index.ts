@@ -106,13 +106,23 @@ document.getElementById("btn-sharelink-create")?.addEventListener("click", async
 document.getElementById("btn-file-upload")?.addEventListener("click", async () => {
 	latency = Date.now();
 	const content = fileContent?.files?.length ? fileContent.files[0] : new Blob();
-	const res = await cloudky.uploadFile(filePath.value, content);
-	printResponse(res);
+	const res = await cloudky.generateUploadFileLink(filePath.value);
+	if (typeof res === "string") {
+		try {
+			const res2 = await fetch(res, {
+				method: "PUT",
+				body: content,
+			});
+			printResponse(await res2.json());
+		} catch {}
+	} else {
+		printResponse(res);
+	}
 });
 
 document.getElementById("btn-file-download")?.addEventListener("click", async () => {
 	latency = Date.now();
-	const res = await cloudky.downloadFile(filePath.value);
+	const res = await cloudky.generateFileDownloadLink(filePath.value);
 	if (typeof res === "string") {
 		const link = document.createElement("a");
 		link.href = res;
