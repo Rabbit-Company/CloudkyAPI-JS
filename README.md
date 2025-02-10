@@ -118,10 +118,10 @@ if (res.error === Error.SUCCESS) {
 
 ### Downloading a File
 
-To download a file, use the `downloadFile` method.
+To download a file, use the `generateFileDownloadLink` method.
 
 ```js
-const res = await cloudky.downloadFile("Documents/hello.txt");
+const res = await cloudky.generateFileDownloadLink("Documents/hello.txt");
 
 if (typeof res === "string") {
 	console.log("Download link successfully generated! Link: " + res);
